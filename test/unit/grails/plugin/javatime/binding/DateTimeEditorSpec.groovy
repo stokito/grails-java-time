@@ -82,7 +82,7 @@ class DateTimeEditorSpec extends Specification {
 
   def "getAsText formats #type.simpleName instances correctly according to a configured pattern"() {
     given:
-    grailsApplication.config.javatime.format."org.joda.time.$type.simpleName" = config
+    grailsApplication.config.javatime.format."$type.simpleName" = config
 
     and:
     def editor = new DateTimeEditor(type)
@@ -161,7 +161,7 @@ class DateTimeEditorSpec extends Specification {
 
   def "setAsText parses #type.simpleName instances correctly according to a configured pattern"() {
     given:
-    grailsApplication.config.javatime.format."javatime.$type.simpleName" = config
+    grailsApplication.config.javatime.format."$type.simpleName" = config
 
     and:
     def editor = new DateTimeEditor(type)
@@ -201,7 +201,7 @@ class DateTimeEditorSpec extends Specification {
 
   def "configured format trumps HTML5"() {
     given:
-    grailsApplication.config.javatime.format."$LocalDate.name" = "dd/MM/yyyy"
+    grailsApplication.config.javatime.format."$LocalDate.simpleName" = "dd/MM/yyyy"
     grailsApplication.config.javatime.format.html5 = true
 
     and:
