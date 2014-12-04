@@ -15,17 +15,17 @@
  */
 package grails.plugin.javatime.binding
 
-import org.joda.time.DateTimeZone
 import org.springframework.beans.PropertyEditorRegistrar
 import org.springframework.beans.PropertyEditorRegistry
 
-class JodaTimePropertyEditorRegistrar implements PropertyEditorRegistrar {
+import java.time.ZoneId
+
+class JavaTimePropertyEditorRegistrar implements PropertyEditorRegistrar {
 
 	void registerCustomEditors(PropertyEditorRegistry registry) {
 		for (type in DateTimeEditor.SUPPORTED_TYPES) {
-			registry.registerCustomEditor type, new StructuredDateTimeEditor(type)
+			registry.registerCustomEditor(type, new StructuredDateTimeEditor(type))
 		}
-
-		registry.registerCustomEditor DateTimeZone, new DateTimeZoneEditor()
+		registry.registerCustomEditor(ZoneId, new ZoneIdEditor())
 	}
 }

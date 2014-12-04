@@ -29,7 +29,7 @@ import spock.lang.*
 class ConversionSpec extends Specification {
 
 	void setup() {
-		JodaConverters.registerJsonAndXmlMarshallers()
+		JavaTimeConverters.registerJsonAndXmlMarshallers()
 	}
 
 	def "can marshal a #value.class.simpleName object to XML"() {

@@ -1,3 +1,9 @@
+import grails.plugin.javatime.binding.DateTimeConverter
+import grails.plugin.javatime.binding.DateTimeStructuredBindingEditor
+import grails.plugin.javatime.binding.JavaTimePropertyEditorRegistrar
+import grails.plugin.javatime.binding.ZoneIdConverter
+import grails.plugin.javatime.converters.JavaTimeConverters
+
 /*
  * Copyright 2014 Rob Fletcher, Sergey Ponomarev
  *
@@ -39,21 +45,21 @@ class JavaTimeGrailsPlugin {
 	]
 
 	def doWithSpring = {
-//		javaTimePropertyEditorRegistrar(JavaTimePropertyEditorRegistrar)
-//
-//		DateTimeConverter.SUPPORTED_TYPES.each{ javaTimeType ->
-//			"${javaTimeType.simpleName}Converter"(DateTimeConverter) {
-//				grailsApplication = ref("grailsApplication")
-//				type = javaTimeType
-//			}
-//		}
-//		"javaTimeZoneConverter"(ZoneIdConverter)
+		javaTimePropertyEditorRegistrar(JavaTimePropertyEditorRegistrar)
+
+		DateTimeConverter.SUPPORTED_TYPES.each{ javaTimeType ->
+			"${javaTimeType.simpleName}Converter"(DateTimeConverter) {
+				grailsApplication = ref("grailsApplication")
+				type = javaTimeType
+			}
+		}
+		"javaTimeZoneConverter"(ZoneIdConverter)
 	}
 
 	def doWithDynamicMethods = { ctx ->
-//		JavaTimeConverters.registerJsonAndXmlMarshallers()
-//		DateTimeStructuredBindingEditor.SUPPORTED_TYPES.each{ type ->
-//			grailsApplication.mainContext.grailsWebDataBinder.registerStructuredEditor type, new DateTimeStructuredBindingEditor(type)
-//		}
+		JavaTimeConverters.registerJsonAndXmlMarshallers()
+		DateTimeStructuredBindingEditor.SUPPORTED_TYPES.each{ type ->
+			grailsApplication.mainContext.grailsWebDataBinder.registerStructuredEditor type, new DateTimeStructuredBindingEditor(type)
+		}
 	}
 }

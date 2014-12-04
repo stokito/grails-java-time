@@ -1,18 +1,22 @@
 package grails.plugin.javatime.binding
 
 import org.grails.databinding.converters.ValueConverter
-import org.joda.time.DateTimeZone
 
-class DateTimeZoneConverter implements ValueConverter {
+import java.time.ZoneId
+
+class ZoneIdConverter implements ValueConverter {
+    @Override
     boolean canConvert(Object value) {
         value instanceof String
     }
 
+    @Override
     Object convert(Object value) {
-        DateTimeZone.forID(value)
+        ZoneId.of(value?.toString())
     }
 
+    @Override
     Class<?> getTargetType() {
-        DateTimeZone
+        ZoneId
     }
 }
