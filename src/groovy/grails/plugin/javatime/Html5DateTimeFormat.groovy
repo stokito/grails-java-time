@@ -1,10 +1,6 @@
 package grails.plugin.javatime
 
-import org.joda.time.format.DateTimeFormatter
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatterBuilder
-import org.joda.time.format.DateTimeParser
-import org.joda.time.format.ISODateTimeFormat
+import java.time.format.DateTimeFormatter
 
 /**
  * Provides a set of DateTimeFormatters that parse and format correctly for the various HTML5 date & time input types.
@@ -12,64 +8,27 @@ import org.joda.time.format.ISODateTimeFormat
 class Html5DateTimeFormat {
 
 	static DateTimeFormatter month() {
-		DateTimeFormat.forPattern("yyyy-MM")
+		DateTimeFormatter.ofPattern("yyyy-MM")
 	}
 
 	static DateTimeFormatter week() {
-		DateTimeFormat.forPattern("xxxx-'W'ww")
+		DateTimeFormatter.ISO_WEEK_DATE
 	}
 
 	static DateTimeFormatter date() {
-		ISODateTimeFormat.date()
+		DateTimeFormatter.ISO_DATE
 	}
 
 	static DateTimeFormatter time() {
-		DateTimeParser[] parsers = [
-				DateTimeFormat.forPattern( "HH:mm" ).getParser(),
-				DateTimeFormat.forPattern( "HH:mm:ss" ).getParser(),
-				DateTimeFormat.forPattern( "HH:mm:ss.SSS" ).getParser()
-		]
-		new DateTimeFormatterBuilder()
-				.append(DateTimeFormat.forPattern("HH:mm:ss.SSS").getPrinter(), parsers)
-				.toFormatter()
-	}
-
-	static DateTimeFormatter timeShort() {
-		new DateTimeFormatterBuilder()
-				.appendPattern("HH:mm")
-				.toFormatter()
+		DateTimeFormatter.ISO_TIME
 	}
 
 	static DateTimeFormatter datetimeLocal() {
-		new DateTimeFormatterBuilder()
-				.append(date())
-				.appendLiteral("T")
-				.append(time())
-				.toFormatter()
-	}
-
-	static DateTimeFormatter datetimeLocalShort() {
-		new DateTimeFormatterBuilder()
-				.append(date())
-				.appendLiteral("T")
-				.append(timeShort())
-				.toFormatter()
+		DateTimeFormatter.ISO_LOCAL_DATE_TIME
 	}
 
 	static DateTimeFormatter datetime() {
-		new DateTimeFormatterBuilder()
-				.append(datetimeLocal())
-				.appendTimeZoneOffset("Z", true, 2, 2)
-				.toFormatter()
-				.withOffsetParsed()
-	}
-
-	static DateTimeFormatter datetimeShort() {
-		new DateTimeFormatterBuilder()
-				.append(datetimeLocalShort())
-				.appendTimeZoneOffset("Z", true, 2, 2)
-				.toFormatter()
-				.withOffsetParsed()
+		DateTimeFormatter.ISO_ZONED_DATE_TIME
 	}
 
 	private Html5DateTimeFormat() {}

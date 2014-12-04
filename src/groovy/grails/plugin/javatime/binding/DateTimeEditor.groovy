@@ -18,13 +18,17 @@ package grails.plugin.javatime.binding
 import java.beans.PropertyEditorSupport
 import grails.plugin.javatime.Html5DateTimeFormat
 import grails.util.Holders
-import org.joda.time.*
-import org.joda.time.format.*
 import org.springframework.context.i18n.LocaleContextHolder
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class DateTimeEditor extends PropertyEditorSupport {
 
-	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, DateTime, Instant].asImmutable()
+	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
 
 	protected final Class type
 	@Lazy private ConfigObject config = Holders.config?.jodatime?.format
@@ -34,16 +38,16 @@ class DateTimeEditor extends PropertyEditorSupport {
 	}
 
 	String getAsText() {
-		return value ? formatter.print(value) : ""
+		return value ? formatter.format(value) : ''
 	}
 
 	void setAsText(String text) {
-		value = text ? formatter.parseDateTime(text)."to$type.simpleName"() : null
+		value = text ? formatter.parse(text) : null
 	}
 
 	protected DateTimeFormatter getFormatter() {
 		if (hasConfigPatternFor(type)) {
-			return DateTimeFormat.forPattern(getConfigPatternFor(type))
+			return DateTimeFormatter.ofPattern(getConfigPatternFor(type))
 		} else if (useISO()) {
 			return getISOFormatterFor(type)
 		} else {
@@ -59,7 +63,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 					style = 'SS'
 			}
 			Locale locale = LocaleContextHolder.locale
-			return DateTimeFormat.forStyle(style).withLocale(locale)
+			return DateTimeFormatter.ofPattern(style, locale)
 		}
 	}
 
@@ -83,11 +87,10 @@ class DateTimeEditor extends PropertyEditorSupport {
 				return Html5DateTimeFormat.date()
 			case LocalDateTime:
 				return Html5DateTimeFormat.datetimeLocal()
-			case DateTime:
+			case ZonedDateTime:
 			case Instant:
 				return Html5DateTimeFormat.datetime()
 		}
 		return null
 	}
-
 }
