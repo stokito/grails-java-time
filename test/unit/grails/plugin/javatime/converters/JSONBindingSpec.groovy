@@ -22,6 +22,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import grails.util.GrailsNameUtils
+import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import spock.lang.Ignore
 import spock.lang.Shared
@@ -48,9 +49,11 @@ class JSONBindingSpec extends Specification {
 
 	void setup() {
 		defineBeans {
-			dateTimeConverter(DateTimeConverter) {
-				type = ZonedDateTime
-				grailsApplication = ref("grailsApplication")
+			DateTimeConverter.SUPPORTED_TYPES.each{ javaTimeType ->
+				"${javaTimeType.simpleName}Converter"(DateTimeConverter) {
+					grailsApplication = ref("grailsApplication")
+					type = javaTimeType
+				}
 			}
 		}
 	}
@@ -61,6 +64,7 @@ class JSONBindingSpec extends Specification {
 		when:
 		def bean = new Timestamp(json)
 		then:
+		!bean.hasErrors()
 		bean[propertyName] == expected
 		where:
 		value                           | expected

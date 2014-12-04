@@ -55,7 +55,7 @@ class ConversionSpec extends Specification {
         LocalDate.of(2009, 8, 2)                             | "2009-08-02"
         LocalTime.of(6, 29)                                  | "06:29:00"
         LocalDateTime.of(2009, 7, 13, 6, 29)                 | "2009-07-13T06:29:00"
-        TimeZone.getTimeZone("America/Vancouver")            | "America/Vancouver"
+        ZoneId.of("America/Vancouver")                       | "America/Vancouver"
     }
 
     def "can marshal a #value.class.simpleName object to JSON"() {
@@ -70,11 +70,11 @@ class ConversionSpec extends Specification {
 
         where:
         value                                                                                       | jsonForm
-        ZonedDateTime.parse('1970-01-01T00:00:00.000Z')                                             | "1970-01-01T00:00:00.000Z"
-        ZonedDateTime.parse('1970-01-01T00:00:00.000Z').withZoneSameInstant(ZoneOffset.ofHours(-5)) | "1969-12-31T19:00:00.000-05:00"
+        ZonedDateTime.parse('1970-01-01T00:00:00.000Z')                                             | "1970-01-01T00:00:00Z"
+        ZonedDateTime.parse('1970-01-01T00:00:00.000Z').withZoneSameInstant(ZoneOffset.ofHours(-5)) | "1969-12-31T19:00:00-05:00"
         LocalDate.of(2009, 8, 2)                                                                    | "2009-08-02"
-        LocalTime.of(6, 29)                                                                         | "06:29:00.000"
-        LocalDateTime.of(2009, 7, 13, 6, 29)                                                        | "2009-07-13T06:29:00.000"
+        LocalTime.of(6, 29)                                                                         | "06:29:00"
+        LocalDateTime.of(2009, 7, 13, 6, 29)                                                        | "2009-07-13T06:29:00"
         ZoneId.of("America/Vancouver")                                                              | "America/Vancouver"
     }
 
