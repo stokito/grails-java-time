@@ -16,63 +16,70 @@
 package grails.plugin.javatime.binding
 
 import org.grails.databinding.SimpleMapDataBindingSource
-import org.joda.time.*
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+
 @Unroll
 class DateTimeStructuredBindingEditorSpec extends Specification {
-	
-	@Shared zone
-	
-	def setupSpec() {
-		zone = DateTimeZone.default
-		DateTimeZone.default = DateTimeZone.forID("Europe/London")
-	}
-	
-	def cleanupSpec() {
-		DateTimeZone.default = zone
-	}
+    @Shared
+    TimeZone zone
 
-	def "getPropertyValue() creates #expected from the fields #fields"() {
-		given:
-		def editor = new DateTimeStructuredBindingEditor(type)
-		def obj = type.newInstance()
-		def dateProps = fields.collectEntries { ["some_date_param_name_$it.key".toString(), it.value]}
-		def source = new SimpleMapDataBindingSource(dateProps)
-		expect: editor.getPropertyValue(obj, 'some_date_param_name', source) == expected
-		where:
-		type          | fields                                                                                      | expected
-		LocalDate     | [year: "1977"]                                                                              | new LocalDate(1977, 1, 1)
-		LocalDate     | [year: "2009", month: "02", day: "20"]                                                      | new LocalDate(2009, 2, 20)
-		LocalDateTime | [year: "2009"]                                                                              | new LocalDateTime(2009, 1, 1, 0, 0)
-		LocalDateTime | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | new LocalDateTime(2009, 3, 6, 17, 21, 33)
-		DateTime      | [year: "2009"]                                                                              | new DateTime(2009, 1, 1, 0, 0, 0, 0)
-		DateTime      | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | new DateTime(2009, 3, 6, 17, 21, 33, 0)
-		LocalTime     | [hour: "17"]                                                                                | new LocalTime(17, 0)
-		LocalTime     | [hour: "17", minute: "55", second: "33"]                                                    | new LocalTime(17, 55, 33)
-		DateTime      | [year: "2009", month: "08", day: "24", hour: "13", minute: "06"]                            | new DateTime(2009, 8, 24, 13, 6, 0, 0).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
-		DateTime      | [year: "2009", month: "08", day: "24", hour: "13", minute: "06", zone: "America/Vancouver"] | new DateTime(2009, 8, 24, 13, 6, 0, 0).withZoneRetainFields(DateTimeZone.forID("America/Vancouver"))
-	}
+    def setupSpec() {
+        zone = TimeZone.default
+        TimeZone.default = TimeZone.getTimeZone("Europe/Berlin")
+    }
 
-	def "getPropertyValue() requires year for date types"() {
-		given:
-		def editor = new DateTimeStructuredBindingEditor(LocalTime)
-		def obj = new LocalTime()
-		def dateProps = ['some_date_param_name_month': 11, 'some_date_param_name_day': 29]
-		def source = new SimpleMapDataBindingSource(dateProps)
-		when: editor.getPropertyValue(obj, 'some_date_param_name', source)
-		then: thrown(IllegalArgumentException)
-	}
+    def cleanupSpec() {
+        TimeZone.default = zone
+    }
 
-	def "getPropertyValue() requires hour for time types"() {
-		given:
-		def editor = new DateTimeStructuredBindingEditor(LocalTime)
-		def obj = new LocalTime()
-		def dateProps = ['some_date_param_name_minute': 29]
-		def source = new SimpleMapDataBindingSource(dateProps)
-		when: editor.getPropertyValue(obj, 'some_date_param_name', source)
-		then: thrown(IllegalArgumentException)
-	}
+    def "getPropertyValue() creates #expected from the fields #fields"() {
+        given:
+        def editor = new DateTimeStructuredBindingEditor(type)
+        def dateProps = fields.collectEntries { ["some_date_param_name_$it.key".toString(), it.value] }
+        def source = new SimpleMapDataBindingSource(dateProps)
+        expect:
+        editor.getPropertyValue(null, 'some_date_param_name', source) == expected
+        where:
+        type          | fields                                                                                      | expected
+        LocalDate     | [year: "1977"]                                                                              | LocalDate.of(1977, 1, 1)
+        LocalDate     | [year: "2009", month: "02", day: "20"]                                                      | LocalDate.of(2009, 2, 20)
+        LocalDateTime | [year: "2009"]                                                                              | LocalDateTime.of(2009, 1, 1, 0, 0)
+        LocalDateTime | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | LocalDateTime.of(2009, 3, 6, 17, 21, 33)
+        ZonedDateTime | [year: "2009"]                                                                              | ZonedDateTime.of(2009, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Berlin"))
+        ZonedDateTime | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | ZonedDateTime.of(2009, 3, 6, 17, 21, 33, 0, ZoneId.of("Europe/Berlin"))
+        LocalTime     | [hour: "17"]                                                                                | LocalTime.of(17, 0)
+        LocalTime     | [hour: "17", minute: "55", second: "33"]                                                    | LocalTime.of(17, 55, 33)
+        ZonedDateTime | [year: "2009", month: "08", day: "24", hour: "13", minute: "06"]                            | ZonedDateTime.of(2009, 8, 24, 13, 6, 0, 0, ZoneId.of("Europe/Berlin"))
+        ZonedDateTime | [year: "2009", month: "08", day: "24", hour: "13", minute: "06", zone: "America/Vancouver"] | ZonedDateTime.of(2009, 8, 24, 13, 6, 0, 0, ZoneId.of("America/Vancouver"))
+    }
+
+    def "getPropertyValue() requires year for date types"() {
+        given:
+        def editor = new DateTimeStructuredBindingEditor(LocalTime)
+        def dateProps = ['some_date_param_name_month': 11, 'some_date_param_name_day': 29]
+        def source = new SimpleMapDataBindingSource(dateProps)
+        when:
+        editor.getPropertyValue(null, 'some_date_param_name', source)
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "getPropertyValue() requires hour for time types"() {
+        given:
+        def editor = new DateTimeStructuredBindingEditor(LocalTime)
+        def dateProps = ['some_date_param_name_minute': 29]
+        def source = new SimpleMapDataBindingSource(dateProps)
+        when:
+        editor.getPropertyValue(null, 'some_date_param_name', source)
+        then:
+        thrown(IllegalArgumentException)
+    }
 }
