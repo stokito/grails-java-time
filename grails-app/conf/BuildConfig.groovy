@@ -19,11 +19,13 @@ grails.project.dependency.resolution = {
 	}
 
 	dependencies {
-		compile 'joda-time:joda-time:2.3'
-
-    test("org.grails:grails-web-databinding-spring:$grailsVersion")
+		test("org.grails:grails-datastore-test-support:1.0.2-grails-2.4")
+	    test("org.grails:grails-web-databinding-spring:$grailsVersion")
 		test('org.hamcrest:hamcrest-all:1.1') { export = false }
 		test('org.jodd:jodd-lagarto:3.4.1') { export = false }
+		compile 'org.jadira.usertype:usertype.spi:3.2.0.GA'
+		compile 'org.jadira.usertype:usertype.core:3.2.0.GA'
+		compile 'org.jadira.usertype:usertype.extended:3.2.0.GA'
 	}
 
 	plugins {
