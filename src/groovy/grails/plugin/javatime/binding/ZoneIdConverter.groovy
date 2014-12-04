@@ -12,7 +12,7 @@ class ZoneIdConverter implements ValueConverter {
 
     @Override
     Object convert(Object value) {
-        ZoneId.of(value?.toString())
+        ZoneId.of(value)
     }
 
     @Override
