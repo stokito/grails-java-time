@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.jodatime.binding
+package grails.plugin.javatime.binding
 
-import grails.plugin.jodatime.binding.StructuredDateTimeEditor
 import org.joda.time.*
 import spock.lang.*
 

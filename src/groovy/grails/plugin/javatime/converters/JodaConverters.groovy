@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.jodatime.converters
+package grails.plugin.javatime.converters
 
 import grails.converters.JSON
 import grails.converters.XML

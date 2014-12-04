@@ -1,6 +1,6 @@
-package grails.plugin.jodatime.binding
+package grails.plugin.javatime.binding
 
-import grails.plugin.jodatime.Html5DateTimeFormat
+import grails.plugin.javatime.Html5DateTimeFormat
 import org.grails.databinding.converters.ValueConverter
 import org.joda.time.DateTime
 import org.joda.time.Instant

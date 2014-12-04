@@ -1,4 +1,4 @@
-package grails.plugin.jodatime
+package grails.plugin.javatime
 
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormat

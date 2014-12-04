@@ -1,4 +1,4 @@
-package grails.plugin.jodatime
+package grails.plugin.javatime
 
 import org.hamcrest.Matcher
 import org.joda.time.*

@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.jodatime.binding
+package grails.plugin.javatime.binding
 
-import java.beans.PropertyEditorSupport
 import org.joda.time.DateTimeZone
+import org.springframework.beans.PropertyEditorRegistrar
+import org.springframework.beans.PropertyEditorRegistry
 
-class DateTimeZoneEditor extends PropertyEditorSupport {
+class JodaTimePropertyEditorRegistrar implements PropertyEditorRegistrar {
 
-	String getAsText() {
-		value?.ID ?: ""
+	void registerCustomEditors(PropertyEditorRegistry registry) {
+		for (type in DateTimeEditor.SUPPORTED_TYPES) {
+			registry.registerCustomEditor type, new StructuredDateTimeEditor(type)
+		}
+
+		for (type in PeriodEditor.SUPPORTED_TYPES) {
+			registry.registerCustomEditor type, new StructuredPeriodEditor(type)
+		}
+
+		registry.registerCustomEditor DateTimeZone, new DateTimeZoneEditor()
 	}
-
-	void setAsText(String text) {
-		value = text ? DateTimeZone.forID(text) : null
-	}
-
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.jodatime.binding
+package grails.plugin.javatime.binding
 
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
@@ -29,7 +29,7 @@ class DateTimeEditorSpec extends Specification {
 
   void cleanup() {
     // it is frankly shocking that Grails requires me to do this. The test environment is not properly idempotent as configuration changes will leak from one test to another
-    grailsApplication.config.remove("jodatime")
+    grailsApplication.config.remove("javatime")
   }
 
   def "getAsText converts null to empty string"() {

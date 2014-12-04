@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.jodatime.converters
+package grails.plugin.javatime.converters
 
 import groovy.transform.CompileStatic
-import org.codehaus.groovy.grails.web.json.JSONElement
 import grails.converters.*
 import grails.persistence.Entity
 import grails.test.mixin.Mock
@@ -26,7 +25,7 @@ import grails.util.GrailsNameUtils
 import org.joda.time.*
 import static org.joda.time.DateTimeZone.UTC
 import spock.lang.*
-import grails.plugin.jodatime.binding.DateTimeConverter
+import grails.plugin.javatime.binding.DateTimeConverter
 
 @TestMixin(ControllerUnitTestMixin)
 @Mock(Timestamp)

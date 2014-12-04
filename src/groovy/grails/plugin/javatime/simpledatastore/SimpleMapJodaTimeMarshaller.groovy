@@ -1,4 +1,4 @@
-package grails.plugin.jodatime.simpledatastore
+package grails.plugin.javatime.simpledatastore
 
 import org.grails.datastore.mapping.engine.types.AbstractMappingAwareCustomTypeMarshaller
 import org.grails.datastore.mapping.query.Query

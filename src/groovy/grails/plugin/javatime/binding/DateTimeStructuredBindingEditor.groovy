@@ -1,4 +1,4 @@
-package grails.plugin.jodatime.binding
+package grails.plugin.javatime.binding
 
 import org.grails.databinding.DataBindingSource
 import org.grails.databinding.StructuredBindingEditor

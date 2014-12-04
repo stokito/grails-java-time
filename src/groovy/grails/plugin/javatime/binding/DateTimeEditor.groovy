@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.jodatime.binding
+package grails.plugin.javatime.binding
 
 import java.beans.PropertyEditorSupport
-import grails.plugin.jodatime.Html5DateTimeFormat
+import grails.plugin.javatime.Html5DateTimeFormat
 import grails.util.Holders
 import org.joda.time.*
 import org.joda.time.format.*
