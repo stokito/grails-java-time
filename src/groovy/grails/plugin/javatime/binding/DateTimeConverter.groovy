@@ -52,10 +52,9 @@ class DateTimeConverter implements ValueConverter {
     }
 
     protected DateTimeFormatter getFormatter() {
-//FIXME
-//        if (hasConfigPatternFor(type)) {
-//            return DateTimeFormatter.ofPattern(getConfigPatternFor(type))
-//        } else
+        if (hasConfigPatternFor(type)) {
+            return DateTimeFormatter.ofPattern(getConfigPatternFor(type))
+        } else
         if (useISO()) {
             return getISOFormatterFor(type)
         } else {
