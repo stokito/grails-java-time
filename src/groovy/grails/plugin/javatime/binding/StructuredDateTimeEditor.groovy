@@ -16,12 +16,11 @@
 package grails.plugin.javatime.binding
 
 import org.codehaus.groovy.grails.web.binding.StructuredPropertyEditor
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
-import org.joda.time.LocalDateTime
-import org.joda.time.LocalTime
-import org.joda.time.MutableDateTime
-import org.joda.time.DateTimeZone
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class StructuredDateTimeEditor extends DateTimeEditor implements StructuredPropertyEditor {
 
@@ -30,25 +29,25 @@ class StructuredDateTimeEditor extends DateTimeEditor implements StructuredPrope
 	}
 
 	private static final FIELDS_BY_TYPE = [
-			(LocalDate): ["year", "month", "day"].asImmutable(),
-			(LocalTime): ["hour", "minute", "second"].asImmutable(),
-			(LocalDateTime): ["year", "month", "day", "hour", "minute", "second"].asImmutable(),
-			(DateTime): ["year", "month", "day", "hour", "minute", "second", "zone"].asImmutable()
+			(LocalDate)    : ["year", "month", "day"].asImmutable(),
+			(LocalTime)    : ["hour", "minute", "second", 'nanoOfSecond'].asImmutable(),
+			(LocalDateTime): ["year", "month", "day", "hour", "minute", "second", 'nanoOfSecond'].asImmutable(),
+			(ZonedDateTime): ["year", "month", "day", "hour", "minute", "second", 'nanoOfSecond', "zone"].asImmutable()
 	].asImmutable()
 
-	private static final DEFAULT_VALUES = [month: 1, day: 1, hour: 0, minute: 0, second: 0].asImmutable()
+	private static final DEFAULT_VALUES = [month: 1, day: 1, hour: 0, minute: 0, second: 0, nanoOfSecond: 0].asImmutable()
 
-	private static final JODA_PROP_NAMES = [year: "year", month: "monthOfYear", day: "dayOfMonth", hour: "hourOfDay", minute: "minuteOfHour", second: "secondOfMinute"].asImmutable()
-
-
+	@Override
 	List getRequiredFields() {
 		return [FIELDS_BY_TYPE[type].head()]
 	}
 
+	@Override
 	List getOptionalFields() {
 		return FIELDS_BY_TYPE[type].tail()
 	}
 
+	@Override
 	Object assemble(Class type, Map fieldValues) throws IllegalArgumentException {
 		if (fieldValues.isEmpty() || fieldValues.every { !it.value }) return null
 
@@ -57,25 +56,23 @@ class StructuredDateTimeEditor extends DateTimeEditor implements StructuredPrope
 				throw new IllegalArgumentException("Can't populate a $type without a $it")
 			}
 		}
-
 		try {
-			def dt = new MutableDateTime()
-			dt.secondOfMinute = 0
-			dt.millisOfSecond = 0
-			(requiredFields + optionalFields).each {
-				switch (it) {
-					case "zone":
-						// null is OK here as DateTimeZone.forID(null) returns default zone
-						dt.zoneRetainFields = DateTimeZone.forID(fieldValues[it])
-						break
-					default:
-						dt."${JODA_PROP_NAMES[it]}" = (fieldValues[it]?.toInteger() ?: DEFAULT_VALUES[it])
+			List ofArgs = (requiredFields + optionalFields).collect { String fieldName ->
+				if (fieldName == 'zone') {
+					ZoneId zone = fieldValues['zone'] ? ZoneId.of(fieldValues['zone'].toString()) : ZoneId.systemDefault()
+					return zone
+				} else {
+					return getPropVal(fieldValues, fieldName)
 				}
 			}
-			return dt.toDateTime()."to$type.simpleName"()
+			return type.of(*ofArgs)
 		}
 		catch (NumberFormatException nfe) {
 			throw new IllegalArgumentException('Unable to parse structured date from request for date ["+propertyName+"]"')
 		}
+	}
+
+	private int getPropVal(Map fieldValues, String fieldName) {
+		return fieldValues[fieldName]?.toInteger() ?: DEFAULT_VALUES[fieldName]
 	}
 }

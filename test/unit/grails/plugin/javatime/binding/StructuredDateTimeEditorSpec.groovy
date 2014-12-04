@@ -15,52 +15,65 @@
  */
 package grails.plugin.javatime.binding
 
-import org.joda.time.*
 import spock.lang.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Unroll
 class StructuredDateTimeEditorSpec extends Specification {
-	
-	@Shared zone
-	
+
+	@Shared
+	TimeZone zone
+
 	def setupSpec() {
-		zone = DateTimeZone.default
-		DateTimeZone.default = DateTimeZone.forID("Etc/GMT+12")
-	}
-	
-	def cleanupSpec() {
-		DateTimeZone.default = zone
+		zone = TimeZone.default
+		TimeZone.default = TimeZone.getTimeZone("UTC-12")
 	}
 
-	def "assemble creates #expected from the fields #fields"() {
-		given: def editor = new StructuredDateTimeEditor(type)
-		expect: editor.assemble(type, fields) == expected
+	def cleanupSpec() {
+		TimeZone.default = zone
+	}
+
+	def "assemble creates #expected #type.simpleName from the fields #fields"() {
+		given:
+		def editor = new StructuredDateTimeEditor(type)
+		expect:
+		editor.assemble(type, fields) == expected
 		where:
 		type          | fields                                                                                      | expected
 		LocalDate     | [:]                                                                                         | null
 		LocalDate     | [year: "", month: "", day: ""]                                                              | null
-		LocalDate     | [year: "1977"]                                                                              | new LocalDate(1977, 1, 1)
-		LocalDate     | [year: "2009", month: "02", day: "20"]                                                      | new LocalDate(2009, 2, 20)
-		LocalDateTime | [year: "2009"]                                                                              | new LocalDateTime(2009, 1, 1, 0, 0)
-		LocalDateTime | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | new LocalDateTime(2009, 3, 6, 17, 21, 33)
-		DateTime      | [year: "2009"]                                                                              | new DateTime(2009, 1, 1, 0, 0, 0, 0)
-		DateTime      | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | new DateTime(2009, 3, 6, 17, 21, 33, 0)
-		LocalTime     | [hour: "17"]                                                                                | new LocalTime(17, 0)
-		LocalTime     | [hour: "17", minute: "55", second: "33"]                                                    | new LocalTime(17, 55, 33)
-		DateTime      | [year: "2009", month: "08", day: "24", hour: "13", minute: "06"]                            | new DateTime(2009, 8, 24, 13, 6, 0, 0).withZoneRetainFields(DateTimeZone.forID("Etc/GMT+12"))
-		DateTime      | [year: "2009", month: "08", day: "24", hour: "13", minute: "06", zone: "America/Vancouver"] | new DateTime(2009, 8, 24, 13, 6, 0, 0).withZoneRetainFields(DateTimeZone.forID("America/Vancouver"))
+		LocalDate     | [year: "1977"]                                                                              | LocalDate.of(1977, 1, 1)
+		LocalDate     | [year: "2009", month: "02", day: "20"]                                                      | LocalDate.of(2009, 2, 20)
+		LocalDateTime | [year: "2009"]                                                                              | LocalDateTime.of(2009, 1, 1, 0, 0)
+		LocalDateTime | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | LocalDateTime.of(2009, 3, 6, 17, 21, 33)
+		ZonedDateTime | [year: "2009"]                                                                              | ZonedDateTime.of(2009, 1, 1, 0, 0, 0, 0, TimeZone.getTimeZone("UTC-12").toZoneId())
+		ZonedDateTime | [year: "2009", month: "03", day: "06", hour: "17", minute: "21", second: "33"]              | ZonedDateTime.of(2009, 3, 6, 17, 21, 33, 0, TimeZone.getTimeZone("UTC-12").toZoneId())
+		LocalTime     | [hour: "17"]                                                                                | LocalTime.of(17, 0)
+		LocalTime     | [hour: "17", minute: "55", second: "33"]                                                    | LocalTime.of(17, 55, 33)
+		ZonedDateTime | [year: "2009", month: "08", day: "24", hour: "13", minute: "06"]                            | ZonedDateTime.of(2009, 8, 24, 13, 6, 0, 0, TimeZone.getTimeZone("UTC-12").toZoneId())
+		ZonedDateTime | [year: "2009", month: "08", day: "24", hour: "13", minute: "06", zone: "America/Vancouver"] | ZonedDateTime.of(2009, 8, 24, 13, 6, 0, 0, ZoneId.of("America/Vancouver"))
 	}
 
 	def "assemble requires year for date types"() {
-		given: def editor = new StructuredDateTimeEditor(LocalDate)
-		when: editor.assemble(LocalDate, [month: 11, day: 29])
-		then: thrown(IllegalArgumentException)
+		given:
+		def editor = new StructuredDateTimeEditor(LocalDate)
+		when:
+		editor.assemble(LocalDate, [month: 11, day: 29])
+		then:
+		thrown(IllegalArgumentException)
 	}
 
 	def "assemble requires hour for time types"() {
-		given: def editor = new StructuredDateTimeEditor(LocalTime)
-		when: editor.assemble(LocalTime, [minute: 29])
-		then: thrown(IllegalArgumentException)
+		given:
+		def editor = new StructuredDateTimeEditor(LocalTime)
+		when:
+		editor.assemble(LocalTime, [minute: 29])
+		then:
+		thrown(IllegalArgumentException)
 	}
 
 }

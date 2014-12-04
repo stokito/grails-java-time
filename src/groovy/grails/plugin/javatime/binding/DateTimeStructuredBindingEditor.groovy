@@ -2,16 +2,15 @@ package grails.plugin.javatime.binding
 
 import org.grails.databinding.DataBindingSource
 import org.grails.databinding.StructuredBindingEditor
-import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
-import org.joda.time.LocalDate
-import org.joda.time.LocalDateTime
-import org.joda.time.LocalTime
-import org.joda.time.MutableDateTime
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class DateTimeStructuredBindingEditor implements StructuredBindingEditor {
 
-    static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, DateTime].asImmutable()
+    static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime].asImmutable()
 
     Class type
 
@@ -21,15 +20,12 @@ class DateTimeStructuredBindingEditor implements StructuredBindingEditor {
 
     private static final FIELDS_BY_TYPE = [
             (LocalDate): ["year", "month", "day"].asImmutable(),
-            (LocalTime): ["hour", "minute", "second"].asImmutable(),
-            (LocalDateTime): ["year", "month", "day", "hour", "minute", "second"].asImmutable(),
-            (DateTime): ["year", "month", "day", "hour", "minute", "second", "zone"].asImmutable()
+            (LocalTime): ["hour", "minute", "second", 'nanoOfSecond'].asImmutable(),
+            (LocalDateTime): ["year", "month", "day", "hour", "minute", "second", 'nanoOfSecond'].asImmutable(),
+            (ZonedDateTime): ["year", "month", "day", "hour", "minute", "second", 'nanoOfSecond', "zone"].asImmutable()
     ].asImmutable()
 
-    private static final DEFAULT_VALUES = [month: 1, day: 1, hour: 0, minute: 0, second: 0].asImmutable()
-
-    private static final JODA_PROP_NAMES = [year: "year", month: "monthOfYear", day: "dayOfMonth", hour: "hourOfDay", minute: "minuteOfHour", second: "secondOfMinute"].asImmutable()
-
+    private static final DEFAULT_VALUES = [month: 1, day: 1, hour: 0, minute: 0, second: 0, nanoOfSecond: 0].asImmutable()
 
     List getRequiredFields() {
         return [FIELDS_BY_TYPE[type].head()]
@@ -39,30 +35,29 @@ class DateTimeStructuredBindingEditor implements StructuredBindingEditor {
         return FIELDS_BY_TYPE[type].tail()
     }
 
+    @Override
     Object getPropertyValue(Object obj, String propertyName, DataBindingSource source) {
         requiredFields.each {
             if (!source["${propertyName}_${it}"]) {
                 throw new IllegalArgumentException("Can't populate a $type without a $it")
             }
         }
-
         try {
-            def dt = new MutableDateTime()
-            dt.secondOfMinute = 0
-            dt.millisOfSecond = 0
-            (requiredFields + optionalFields).each {
-                switch (it) {
-                    case "zone":
-                        // null is OK here as DateTimeZone.forID(null) returns default zone
-                        dt.zoneRetainFields = DateTimeZone.forID(source["${propertyName}_${it}"])
-                        break
-                    default:
-                        dt."${JODA_PROP_NAMES[it]}" = (source["${propertyName}_${it}"]?.toInteger() ?: DEFAULT_VALUES[it])
+            List ofArgs = (requiredFields + optionalFields).collect { String fieldName ->
+                if (fieldName == 'zone') {
+                    ZoneId zone = source["${propertyName}_zone"] ? ZoneId.of(source["${propertyName}_zone"].toString()) : ZoneId.systemDefault()
+                    return zone
+                } else {
+                    return getPropVal(source, propertyName, fieldName)
                 }
             }
-            return dt.toDateTime()."to$type.simpleName"()
+            return type.of(*ofArgs)
         } catch (NumberFormatException nfe) {
             throw new IllegalArgumentException("Unable to parse structured date from request for $type [$propertyName]", nfe)
         }
+    }
+
+    private int getPropVal(DataBindingSource source, String propertyName, String fieldName) {
+        return source["${propertyName}_${fieldName}"]?.toInteger() ?: DEFAULT_VALUES[fieldName]
     }
 }
