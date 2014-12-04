@@ -2,21 +2,22 @@ package grails.plugin.javatime.binding
 
 import grails.plugin.javatime.Html5DateTimeFormat
 import org.grails.databinding.converters.ValueConverter
-import org.joda.time.DateTime
-import org.joda.time.Instant
-import org.joda.time.LocalDate
-import org.joda.time.LocalDateTime
-import org.joda.time.LocalTime
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.springframework.context.i18n.LocaleContextHolder
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class DateTimeConverter implements ValueConverter {
 
-    static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, DateTime, Instant].asImmutable()
+    static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
 
     Class type
     def grailsApplication
+    ZoneId defaultTimeZoneId = ZoneId.systemDefault()
 
     @Lazy private ConfigObject config = grailsApplication.config.jodatime.format
 
@@ -25,7 +26,23 @@ class DateTimeConverter implements ValueConverter {
     }
 
     public Object convert(Object value) {
-        value ? formatter.parseDateTime(value)."to$type.simpleName"() : null
+        return value ? safeParse(value) : null
+    }
+
+    //HACK: http://stackoverflow.com/questions/23596530/unable-to-obtain-zoneddatetime-from-temporalaccessor-using-datetimeformatter-and/27285822#27285822
+    def safeParse(value) {
+        String dateAsStr = value
+        if (type == ZonedDateTime && dateAsStr.length() == 10) {
+            dateAsStr += 'T00:00:00'
+        }
+        def res
+        try {
+            res = type.parse(dateAsStr, formatter)
+        } catch (Exception ex) {
+            dateAsStr += ZonedDateTime.now(defaultTimeZoneId).offset.id
+            res = type.parse(dateAsStr, formatter)
+        }
+        return res
     }
 
     public Class<?> getTargetType() {
@@ -33,9 +50,11 @@ class DateTimeConverter implements ValueConverter {
     }
 
     protected DateTimeFormatter getFormatter() {
-        if (hasConfigPatternFor(type)) {
-            return DateTimeFormat.forPattern(getConfigPatternFor(type))
-        } else if (useISO()) {
+//FIXME
+//        if (hasConfigPatternFor(type)) {
+//            return DateTimeFormatter.ofPattern(getConfigPatternFor(type))
+//        } else
+        if (useISO()) {
             return getISOFormatterFor(type)
         } else {
             def style
@@ -50,7 +69,7 @@ class DateTimeConverter implements ValueConverter {
                     style = 'SS'
             }
             Locale locale = LocaleContextHolder.locale
-            return DateTimeFormat.forStyle(style).withLocale(locale)
+            return DateTimeFormatter.ofPattern(style, locale)
         }
     }
 
@@ -74,7 +93,7 @@ class DateTimeConverter implements ValueConverter {
                 return Html5DateTimeFormat.date()
             case LocalDateTime:
                 return Html5DateTimeFormat.datetimeLocal()
-            case DateTime:
+            case ZonedDateTime:
             case Instant:
                 return Html5DateTimeFormat.datetime()
         }
