@@ -20,72 +20,77 @@ import org.codehaus.groovy.grails.web.json.JSONElement
 import grails.converters.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import org.joda.time.*
-import static org.joda.time.DateTimeZone.UTC
+
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+
 import spock.lang.*
 
 @TestMixin(ControllerUnitTestMixin)
 @Unroll
 class ConversionSpec extends Specification {
 
-	void setup() {
-		JavaTimeConverters.registerJsonAndXmlMarshallers()
-	}
+    void setup() {
+        JavaTimeConverters.registerJsonAndXmlMarshallers()
+    }
 
-	def "can marshal a #value.class.simpleName object to XML"() {
-		given:
-		def o = [value: value]
+    def "can marshal a #value.class.simpleName object to XML"() {
+        given:
+        def o = [value: value]
 
-		when:
-		def xml = marshalAsXML(o)
+        when:
+        def xml = marshalAsXML(o)
 
-		then:
-		xml.entry.find { it."@key" == "value" }?.text() == xmlForm
+        then:
+        xml.entry.find { it."@key" == "value" }?.text() == xmlForm
 
-		where:
-		value                                                    | xmlForm
-		new DateTime(0).withZone(UTC)                            | "1970-01-01T00:00:00.000Z"
-		new DateTime(0).withZone(DateTimeZone.forOffsetHours(3)) | "1970-01-01T03:00:00.000+03:00"
-		new LocalDate(2009, 8, 2)                                | "2009-08-02"
-		new LocalTime(6, 29)                                     | "06:29:00.000"
-		new LocalDateTime(2009, 7, 13, 6, 29)                    | "2009-07-13T06:29:00.000"
-		DateTimeZone.forID("America/Vancouver")                  | "America/Vancouver"
-	}
+        where:
+        value                                                | xmlForm
+        ZonedDateTime.parse('1970-01-01T00:00:00.000Z')      | "1970-01-01T00:00:00Z"
+        ZonedDateTime.parse('1970-01-01T00:00:00.000+03:00') | "1970-01-01T00:00:00+03:00"
+        LocalDate.of(2009, 8, 2)                             | "2009-08-02"
+        LocalTime.of(6, 29)                                  | "06:29:00"
+        LocalDateTime.of(2009, 7, 13, 6, 29)                 | "2009-07-13T06:29:00"
+        TimeZone.getTimeZone("America/Vancouver")            | "America/Vancouver"
+    }
 
-	def "can marshal a #value.class.simpleName object to JSON"() {
-		given:
-		def o = [value: value]
+    def "can marshal a #value.class.simpleName object to JSON"() {
+        given:
+        def o = [value: value]
 
-		when:
-		def json = marshalAsJSON(o)
+        when:
+        def json = marshalAsJSON(o)
 
-		then:
-		json.value == jsonForm
+        then:
+        json.value == jsonForm
 
-		where:
-		value                                                     | jsonForm
-		new DateTime(0).withZone(UTC)                             | "1970-01-01T00:00:00.000Z"
-		new DateTime(0).withZone(DateTimeZone.forOffsetHours(-5)) | "1969-12-31T19:00:00.000-05:00"
-		new LocalDate(2009, 8, 2)                                 | "2009-08-02"
-		new LocalTime(6, 29)                                      | "06:29:00.000"
-		new LocalDateTime(2009, 7, 13, 6, 29)                     | "2009-07-13T06:29:00.000"
-		DateTimeZone.forID("America/Vancouver")                   | "America/Vancouver"
-	}
+        where:
+        value                                                                                       | jsonForm
+        ZonedDateTime.parse('1970-01-01T00:00:00.000Z')                                             | "1970-01-01T00:00:00.000Z"
+        ZonedDateTime.parse('1970-01-01T00:00:00.000Z').withZoneSameInstant(ZoneOffset.ofHours(-5)) | "1969-12-31T19:00:00.000-05:00"
+        LocalDate.of(2009, 8, 2)                                                                    | "2009-08-02"
+        LocalTime.of(6, 29)                                                                         | "06:29:00.000"
+        LocalDateTime.of(2009, 7, 13, 6, 29)                                                        | "2009-07-13T06:29:00.000"
+        ZoneId.of("America/Vancouver")                                                              | "America/Vancouver"
+    }
 
-	@CompileStatic
-	private JSONElement marshalAsJSON(object) {
-		def sw = new StringWriter()
-		(object as JSON).render(sw)
-		def json = JSON.parse(sw.toString())
-		return json
-	}
+    @CompileStatic
+    private JSONElement marshalAsJSON(object) {
+        def sw = new StringWriter()
+        (object as JSON).render(sw)
+        def json = JSON.parse(sw.toString())
+        return json
+    }
 
-	@CompileStatic
-	private marshalAsXML(object) {
-		def sw = new StringWriter()
-		(object as XML).render(sw)
-		def xml = XML.parse(sw.toString())
-		return xml
-	}
-
+    @CompileStatic
+    private marshalAsXML(object) {
+        def sw = new StringWriter()
+        (object as XML).render(sw)
+        def xml = XML.parse(sw.toString())
+        return xml
+    }
 }
