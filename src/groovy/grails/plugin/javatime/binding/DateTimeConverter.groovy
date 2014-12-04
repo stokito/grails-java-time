@@ -1,6 +1,8 @@
 package grails.plugin.javatime.binding
 
 import grails.plugin.javatime.Html5DateTimeFormat
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.grails.databinding.converters.ValueConverter
 import org.springframework.context.i18n.LocaleContextHolder
 import java.time.Instant
@@ -16,10 +18,10 @@ class DateTimeConverter implements ValueConverter {
     static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
 
     Class type
-    def grailsApplication
+    GrailsApplication grailsApplication
     ZoneId defaultTimeZoneId = ZoneId.systemDefault()
 
-    @Lazy private ConfigObject config = grailsApplication.config.jodatime.format
+    @Lazy private ConfigObject config = grailsApplication.config.javatime.format
 
     public boolean canConvert(Object value) {
         value instanceof String

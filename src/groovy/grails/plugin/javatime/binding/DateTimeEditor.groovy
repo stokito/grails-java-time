@@ -31,7 +31,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
 
 	protected final Class type
-	@Lazy private ConfigObject config = Holders.config?.jodatime?.format
+	@Lazy private ConfigObject config = Holders.config?.javatime?.format
 
 	DateTimeEditor(Class type) {
 		this.type = type
@@ -68,11 +68,11 @@ class DateTimeEditor extends PropertyEditorSupport {
 	}
 
 	private boolean hasConfigPatternFor(Class type) {
-		config?.flatten()?."$type.name"
+		config?.flatten()?."$type.simpleName"
 	}
 
 	private String getConfigPatternFor(Class type) {
-		config?.flatten()?."$type.name"
+		config?.flatten()?."$type.simpleName"
 	}
 
 	private boolean useISO() {

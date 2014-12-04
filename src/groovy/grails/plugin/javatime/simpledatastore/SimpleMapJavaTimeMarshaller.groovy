@@ -19,12 +19,12 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 /**
- * A marshaller for Joda-Time types usable in the Simple Map datastore.
+ * A marshaller for Java-Time types usable in the Simple Map datastore.
  * @param < T >
  */
-class SimpleMapJodaTimeMarshaller<T> extends AbstractMappingAwareCustomTypeMarshaller<T, Map, SimpleMapResultList> {
+class SimpleMapJavaTimeMarshaller<T> extends AbstractMappingAwareCustomTypeMarshaller<T, Map, SimpleMapResultList> {
 
-	SimpleMapJodaTimeMarshaller(Class<T> targetType) {
+	SimpleMapJavaTimeMarshaller(Class<T> targetType) {
 		super(targetType)
 	}
 
@@ -57,7 +57,7 @@ class SimpleMapJodaTimeMarshaller<T> extends AbstractMappingAwareCustomTypeMarsh
 
 	static initialize() {
 		for (type in SUPPORTED_TYPES) {
-			MappingFactory.registerCustomType(new SimpleMapJodaTimeMarshaller(type))
+			MappingFactory.registerCustomType(new SimpleMapJavaTimeMarshaller(type))
 		}
 	}
 }
