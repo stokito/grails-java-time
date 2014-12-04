@@ -26,10 +26,6 @@ class JodaTimePropertyEditorRegistrar implements PropertyEditorRegistrar {
 			registry.registerCustomEditor type, new StructuredDateTimeEditor(type)
 		}
 
-		for (type in PeriodEditor.SUPPORTED_TYPES) {
-			registry.registerCustomEditor type, new StructuredPeriodEditor(type)
-		}
-
 		registry.registerCustomEditor DateTimeZone, new DateTimeZoneEditor()
 	}
 }
