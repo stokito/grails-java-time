@@ -59,7 +59,7 @@ class JavaTimeGrailsPlugin {
 	def doWithDynamicMethods = { ctx ->
 		JavaTimeConverters.registerJsonAndXmlMarshallers()
 		DateTimeStructuredBindingEditor.SUPPORTED_TYPES.each{ type ->
-			grailsApplication.mainContext.grailsWebDataBinder.registerStructuredEditor type, new DateTimeStructuredBindingEditor(type)
+			application.mainContext.grailsWebDataBinder.registerStructuredEditor type, new DateTimeStructuredBindingEditor(type)
 		}
 	}
 }
