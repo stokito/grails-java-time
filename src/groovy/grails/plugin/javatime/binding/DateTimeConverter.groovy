@@ -13,6 +13,10 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.Temporal
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 class DateTimeConverter implements ValueConverter {
 
@@ -34,8 +38,11 @@ class DateTimeConverter implements ValueConverter {
 
     //HACK: http://stackoverflow.com/questions/23596530/unable-to-obtain-zoneddatetime-from-temporalaccessor-using-datetimeformatter-and/27285822#27285822
     def safeParse(String value) {
-        ZonedDateTime dt = SmartDateParser.parse(value)
-        return dt."to${type.simpleName}"()
+        if (type == ZonedDateTime.class) {
+            SmartDateParser.parse(value, defaultTimeZoneId);
+        } else {
+            return type.parse(value)
+        }
     }
 
     public Class<?> getTargetType() {

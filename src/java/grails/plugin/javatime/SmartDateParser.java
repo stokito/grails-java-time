@@ -13,7 +13,7 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 
 public class SmartDateParser {
-    public static ZonedDateTime parse(String value) {
+    public static ZonedDateTime parse(String value, ZoneId defaultTimeZoneId) {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
                 .append(ISO_LOCAL_DATE)
@@ -37,9 +37,8 @@ public class SmartDateParser {
             return ((ZonedDateTime) temporalAccessor);
         }
         if (temporalAccessor instanceof LocalDateTime) {
-            return ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
+            return ((LocalDateTime) temporalAccessor).atZone(defaultTimeZoneId);
         }
-        return ((LocalDate) temporalAccessor).atStartOfDay(ZoneId.systemDefault());
+        return ((LocalDate) temporalAccessor).atStartOfDay(defaultTimeZoneId);
     }
-
 }
