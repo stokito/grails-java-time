@@ -1,6 +1,7 @@
 package grails.plugin.javatime.binding
 
 import grails.plugin.javatime.Html5DateTimeFormat
+import grails.plugin.javatime.SmartDateParser
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.grails.databinding.converters.ValueConverter
@@ -28,23 +29,13 @@ class DateTimeConverter implements ValueConverter {
     }
 
     public Object convert(Object value) {
-        return value ? safeParse(value) : null
+        return value ? safeParse((String)value) : null
     }
 
     //HACK: http://stackoverflow.com/questions/23596530/unable-to-obtain-zoneddatetime-from-temporalaccessor-using-datetimeformatter-and/27285822#27285822
-    def safeParse(value) {
-        String dateAsStr = value
-        if (type == ZonedDateTime && dateAsStr.length() == 10) {
-            dateAsStr += 'T00:00:00'
-        }
-        def res
-        try {
-            res = type.parse(dateAsStr, formatter)
-        } catch (Exception ex) {
-            dateAsStr += ZonedDateTime.now(defaultTimeZoneId).offset.id
-            res = type.parse(dateAsStr, formatter)
-        }
-        return res
+    def safeParse(String value) {
+        ZonedDateTime dt = SmartDateParser.parse(value)
+        return dt."to${type.simpleName}"()
     }
 
     public Class<?> getTargetType() {
