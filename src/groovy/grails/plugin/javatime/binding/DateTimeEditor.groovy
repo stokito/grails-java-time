@@ -27,9 +27,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class DateTimeEditor extends PropertyEditorSupport {
-
 	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
-
 	protected final Class type
 	@Lazy private ConfigObject config = Holders.config?.javatime?.format
 
@@ -37,10 +35,12 @@ class DateTimeEditor extends PropertyEditorSupport {
 		this.type = type
 	}
 
+	@Override
 	String getAsText() {
 		return value ? formatter.format(value) : ''
 	}
 
+	@Override
 	void setAsText(String text) {
 		value = text ? formatter.parse(text) : null
 	}

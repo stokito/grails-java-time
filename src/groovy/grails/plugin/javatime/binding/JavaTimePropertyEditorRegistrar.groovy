@@ -21,7 +21,7 @@ import org.springframework.beans.PropertyEditorRegistry
 import java.time.ZoneId
 
 class JavaTimePropertyEditorRegistrar implements PropertyEditorRegistrar {
-
+	@Override
 	void registerCustomEditors(PropertyEditorRegistry registry) {
 		for (type in DateTimeEditor.SUPPORTED_TYPES) {
 			registry.registerCustomEditor(type, new StructuredDateTimeEditor(type))

@@ -25,28 +25,28 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class JavaTimeConverters {
-	static void registerJsonAndXmlMarshallers() {
-		[JSON, XML].each { converter ->
-			converter.registerObjectMarshaller(ZonedDateTime, 1) { ZonedDateTime it ->
-				if (!it) return null
-				DateTimeFormatter.ISO_ZONED_DATE_TIME.withZone(it?.zone).format(it)
-			}
-			converter.registerObjectMarshaller(LocalDate, 2) { LocalDate it ->
-				if (!it) return null
-				DateTimeFormatter.ISO_LOCAL_DATE.format(it)
-			}
-			converter.registerObjectMarshaller(LocalTime, 3) { LocalTime it ->
-				if (!it) return null
-				DateTimeFormatter.ISO_LOCAL_TIME.format(it)
-			}
-			converter.registerObjectMarshaller(LocalDateTime, 4) { LocalDateTime it ->
-				if (!it) return null
-				DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(it)
-			}
-			converter.registerObjectMarshaller(ZoneId, 5) { ZoneId it ->
-				if (!it) return null
-				it?.id
-			}
-		}
-	}
+    static void registerJsonAndXmlMarshallers() {
+        [JSON, XML].each { converter ->
+            converter.registerObjectMarshaller(ZonedDateTime, 1) { ZonedDateTime it ->
+                if (!it) return null
+                DateTimeFormatter.ISO_ZONED_DATE_TIME.withZone(it?.zone).format(it)
+            }
+            converter.registerObjectMarshaller(LocalDate, 2) { LocalDate it ->
+                if (!it) return null
+                DateTimeFormatter.ISO_LOCAL_DATE.format(it)
+            }
+            converter.registerObjectMarshaller(LocalTime, 3) { LocalTime it ->
+                if (!it) return null
+                DateTimeFormatter.ISO_LOCAL_TIME.format(it)
+            }
+            converter.registerObjectMarshaller(LocalDateTime, 4) { LocalDateTime it ->
+                if (!it) return null
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(it)
+            }
+            converter.registerObjectMarshaller(ZoneId, 5) { ZoneId it ->
+                if (!it) return null
+                it?.id
+            }
+        }
+    }
 }

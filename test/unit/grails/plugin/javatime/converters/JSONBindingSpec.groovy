@@ -36,56 +36,57 @@ import java.time.*
 @Unroll
 class JSONBindingSpec extends Specification {
 
-	@Shared TimeZone originalTimeZone
+    @Shared
+    TimeZone originalTimeZone
 
-	void setupSpec() {
-		originalTimeZone = TimeZone.default
-		TimeZone.default = TimeZone.getTimeZone("America/Vancouver")
-	}
+    void setupSpec() {
+        originalTimeZone = TimeZone.default
+        TimeZone.default = TimeZone.getTimeZone("America/Vancouver")
+    }
 
-	void cleanupSpec() {
-		TimeZone.default = originalTimeZone
-	}
+    void cleanupSpec() {
+        TimeZone.default = originalTimeZone
+    }
 
-	void setup() {
-		defineBeans {
-			DateTimeConverter.SUPPORTED_TYPES.each{ javaTimeType ->
-				"${javaTimeType.simpleName}Converter"(DateTimeConverter) {
-					grailsApplication = ref("grailsApplication")
-					type = javaTimeType
-				}
-			}
-		}
-	}
+    void setup() {
+        defineBeans {
+            DateTimeConverter.SUPPORTED_TYPES.each { javaTimeType ->
+                "${javaTimeType.simpleName}Converter"(DateTimeConverter) {
+                    grailsApplication = ref("grailsApplication")
+                    type = javaTimeType
+                }
+            }
+        }
+    }
 
-	def "can unmarshal a #expected.class.simpleName object from a JSON element #value"() {
-		given:
-		def json = JSON.parse("""{$propertyName: "$value"}""")
-		when:
-		def bean = new Timestamp(json)
-		then:
-		!bean.hasErrors()
-		bean[propertyName] == expected
-		where:
-		value                           | expected
-		'2014-04-23T04:30:45.123Z'      | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.UTC)
-		'2014-04-23T04:30:45.123+01:00' | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.ofHours(1))
-		'2014-04-23T04:30:45.123'       | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneId.systemDefault())
-		'2014-04-23T04:30'              | ZonedDateTime.of(2014, 4, 23, 4, 30, 0, 0, ZoneId.systemDefault())
-		'2014-04-23T04:30:45.123'       | LocalDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000)
-		'2014-04-23T04:30:45'           | LocalDateTime.of(2014, 4, 23, 4, 30, 45)
-		'04:30:45.123'                  | LocalTime.of(4, 30, 45, 123)
-		'04:30:45'                      | LocalTime.of(4, 30, 45)
+    def "can unmarshal a #expected.class.simpleName object from a JSON element #value"() {
+        given:
+        def json = JSON.parse("""{$propertyName: "$value"}""")
+        when:
+        def bean = new Timestamp(json)
+        then:
+        !bean.hasErrors()
+        bean[propertyName] == expected
+        where:
+        value                           | expected
+        '2014-04-23T04:30:45.123Z'      | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.UTC)
+        '2014-04-23T04:30:45.123+01:00' | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.ofHours(1))
+        '2014-04-23T04:30:45.123'       | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneId.systemDefault())
+        '2014-04-23T04:30'              | ZonedDateTime.of(2014, 4, 23, 4, 30, 0, 0, ZoneId.systemDefault())
+        '2014-04-23T04:30:45.123'       | LocalDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000)
+        '2014-04-23T04:30:45'           | LocalDateTime.of(2014, 4, 23, 4, 30, 45)
+        '04:30:45.123'                  | LocalTime.of(4, 30, 45, 123)
+        '04:30:45'                      | LocalTime.of(4, 30, 45)
 
-		propertyName = GrailsNameUtils.getPropertyNameRepresentation(expected.class.simpleName)
-	}
+        propertyName = GrailsNameUtils.getPropertyNameRepresentation(expected.class.simpleName)
+    }
 
 }
 
 @CompileStatic
 @Entity
 class Timestamp {
-	ZonedDateTime zonedDateTime
-	LocalDateTime localDateTime
-	LocalTime localTime
+    ZonedDateTime zonedDateTime
+    LocalDateTime localDateTime
+    LocalTime localTime
 }

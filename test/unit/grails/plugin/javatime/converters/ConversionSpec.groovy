@@ -41,13 +41,10 @@ class ConversionSpec extends Specification {
     def "can marshal a #value.class.simpleName object to XML"() {
         given:
         def o = [value: value]
-
         when:
         def xml = marshalAsXML(o)
-
         then:
         xml.entry.find { it."@key" == "value" }?.text() == xmlForm
-
         where:
         value                                                | xmlForm
         ZonedDateTime.parse('1970-01-01T00:00:00.000Z')      | "1970-01-01T00:00:00Z"
@@ -61,13 +58,10 @@ class ConversionSpec extends Specification {
     def "can marshal a #value.class.simpleName object to JSON"() {
         given:
         def o = [value: value]
-
         when:
         def json = marshalAsJSON(o)
-
         then:
         json.value == jsonForm
-
         where:
         value                                                                                       | jsonForm
         ZonedDateTime.parse('1970-01-01T00:00:00.000Z')                                             | "1970-01-01T00:00:00Z"

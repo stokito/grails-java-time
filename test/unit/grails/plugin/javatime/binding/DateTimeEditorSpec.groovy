@@ -35,180 +35,174 @@ import static java.util.Locale.*
 @Unroll
 class DateTimeEditorSpec extends Specification {
 
-  void cleanup() {
-    // it is frankly shocking that Grails requires me to do this. The test environment is not properly idempotent as configuration changes will leak from one test to another
-    grailsApplication.config.remove("javatime")
-  }
+    void cleanup() {
+        // it is frankly shocking that Grails requires me to do this. The test environment is not properly idempotent as configuration changes will leak from one test to another
+        grailsApplication.config.remove("javatime")
+    }
 
-  def "getAsText converts null to empty string"() {
-    given:
-    def editor = new DateTimeEditor(LocalDate)
+    def "getAsText converts null to empty string"() {
+        given:
+        def editor = new DateTimeEditor(LocalDate)
+        when:
+        editor.value = null
+        then:
+        editor.asText == ""
+    }
 
-    when: editor.value = null
-    then: editor.asText == ""
-  }
+    def "setAsText converts empty string to null"() {
+        given:
+        def editor = new DateTimeEditor(LocalDate)
+        when:
+        editor.asText = ""
+        then:
+        editor.value == null
+    }
 
-  def "setAsText converts empty string to null"() {
-    given:
-    def editor = new DateTimeEditor(LocalDate)
+    def "getAsText formats #type.simpleName instances correctly for #locale locale"() {
+        given:
+        def editor = new DateTimeEditor(type)
+        and:
+        LocaleContextHolder.locale = locale
+        when:
+        editor.value = value
+        then:
+        editor.asText == expected
+        where:
+        type          | value                                                             | locale | expected
+        LocalDate     | LocalDate.of(1971, 11, 29)                                        | UK     | "29/11/71"
+        LocalDate     | LocalDate.of(1971, 11, 29)                                        | US     | "11/29/71"
+        LocalDateTime | LocalDateTime.of(2009, 3, 6, 17, 0)                               | UK     | "06/03/09 17:00"
+        LocalDateTime | LocalDateTime.of(2009, 3, 6, 17, 0)                               | US     | "3/6/09 5:00 PM"
+        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | UK     | "06/03/09 17:00"
+        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | US     | "3/6/09 5:00 PM"
+        LocalTime     | LocalTime.of(23, 59)                                              | UK     | "23:59"
+        LocalTime     | LocalTime.of(23, 59)                                              | US     | "11:59 PM"
+        Instant       | Instant.ofEpochMilli(92554380000)                                 | UK     | "07/12/72 05:33"
+        Instant       | Instant.ofEpochMilli(92554380000)                                 | US     | "12/7/72 5:33 AM"
+    }
 
-    when: editor.asText = ""
-    then: editor.value == null
-  }
+    def "getAsText formats #type.simpleName instances correctly according to a configured pattern"() {
+        given:
+        grailsApplication.config.javatime.format."$type.simpleName" = config
+        and:
+        def editor = new DateTimeEditor(type)
+        when:
+        editor.value = value
+        then:
+        editor.asText == expected
+        where:
+        type          | config                | value                                          | expected
+        LocalDate     | "dd/MM/yyyy"          | LocalDate.of(1971, 11, 29)                     | "29/11/1971"
+        LocalDateTime | "dd/MM/yyyy h:mm a"   | LocalDateTime.of(1971, 11, 29, 17, 0)          | "29/11/1971 5:00 PM"
+        ZonedDateTime | "dd/MM/yyyy h:mm a Z" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC) | "06/03/2009 5:00 PM +0000"
+        LocalTime     | "h:mm a"              | LocalTime.of(23, 59)                           | "11:59 PM"
+        Instant       | "dd/MM/yyyy h:mm a Z" | Instant.ofEpochMilli(92554380000)              | "07/12/1972 5:33 AM +0000"
+    }
 
-  def "getAsText formats #type.simpleName instances correctly for #locale locale"() {
-    given:
-    def editor = new DateTimeEditor(type)
+    def "getAsText formats #type.simpleName instances correctly for HTML5"() {
+        given:
+        grailsApplication.config.javatime.format.html5 = true
+        and:
+        def editor = new DateTimeEditor(type)
+        when:
+        editor.value = value
+        then:
+        editor.asText == expected
+        where:
+        type          | value                                                            | expected
+        LocalDate     | LocalDate.of(1971, 11, 29)                                       | "1971-11-29"
+        LocalDateTime | LocalDateTime.of(1971, 11, 29, 17, 0)                            | "1971-11-29T17:00:00.000"
+        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "2009-03-06T17:00:00.000+01:00"
+        LocalTime     | LocalTime.of(23, 59)                                             | "23:59:00.000"
+        Instant       | Instant.ofEpochMilli(92554380000)                                | "1972-12-07T05:33:00.000Z"
+    }
 
-    and: LocaleContextHolder.locale = locale
+    def "Instant values are always formatted as UTC"() {
+        given:
+        grailsApplication.config.javatime.format.html5 = true
+        and:
+        def defaultTimeZone = TimeZone.default
+        TimeZone.default = TimeZone.getTimeZone("EST")
+        and:
+        def editor = new DateTimeEditor(Instant)
+        when:
+        editor.value = Instant.ofEpochMilli(92554380000)
+        then:
+        editor.asText == "1972-12-07T05:33:00.000Z"
+        cleanup:
+        TimeZone.default = defaultTimeZone
+    }
 
-    when: editor.value = value
+    def "setAsText parses #type.simpleName instances from #locale locale format text"() {
+        given:
+        def editor = new DateTimeEditor(type)
+        and:
+        LocaleContextHolder.locale = locale
+        when:
+        editor.asText = text
+        then:
+        editor.value == expected
+        where:
+        type          | text              | locale | expected
+        LocalDate     | "29/11/71"        | UK     | LocalDate.of(1971, 11, 29)
+        LocalDate     | "11/29/71"        | US     | LocalDate.of(1971, 11, 29)
+        LocalDateTime | "06/03/09 17:00"  | UK     | LocalDateTime.of(2009, 3, 6, 17, 0)
+        LocalDateTime | "3/6/09 5:00 PM"  | US     | LocalDateTime.of(2009, 3, 6, 17, 0)
+        ZonedDateTime | "06/03/09 17:00"  | UK     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
+        ZonedDateTime | "3/6/09 5:00 PM"  | US     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
+        LocalTime     | "23:59"           | UK     | LocalTime.of(23, 59)
+        LocalTime     | "11:59 PM"        | US     | LocalTime.of(23, 59)
+        Instant       | "07/12/72 05:33"  | UK     | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        Instant       | "12/7/72 5:33 AM" | US     | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+    }
 
-    then: editor.asText == expected
+    def "setAsText parses #type.simpleName instances correctly according to a configured pattern"() {
+        given:
+        grailsApplication.config.javatime.format."$type.simpleName" = config
+        and:
+        def editor = new DateTimeEditor(type)
+        when:
+        editor.asText = text
+        then:
+        editor.value == expected
+        where:
+        type          | config                | text                        | expected
+        LocalDate     | "dd/MM/yyyy"          | "29/11/1971"                | LocalDate.of(1971, 11, 29)
+        LocalDateTime | "dd/MM/yyyy h:mm a"   | "29/11/1971 5:00 PM"        | LocalDateTime.of(1971, 11, 29, 17, 0)
+        ZonedDateTime | "dd/MM/yyyy h:mm a Z" | "06/03/2009 5:00 PM +0000"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
+        LocalTime     | "h:mm a"              | "11:59 PM"                  | LocalTime.of(23, 59)
+        Instant       | "dd/MM/yyyy h:mm a Z" | "07/12/1972 12:33 AM -0500" | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
+    }
 
-    where:
-    type          | value                                                             | locale | expected
-    LocalDate     | LocalDate.of(1971, 11, 29)                                        | UK     | "29/11/71"
-    LocalDate     | LocalDate.of(1971, 11, 29)                                        | US     | "11/29/71"
-    LocalDateTime | LocalDateTime.of(2009, 3, 6, 17, 0)                               | UK     | "06/03/09 17:00"
-    LocalDateTime | LocalDateTime.of(2009, 3, 6, 17, 0)                               | US     | "3/6/09 5:00 PM"
-    ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | UK     | "06/03/09 17:00"
-    ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | US     | "3/6/09 5:00 PM"
-    LocalTime     | LocalTime.of(23, 59)                                              | UK     | "23:59"
-    LocalTime     | LocalTime.of(23, 59)                                              | US     | "11:59 PM"
-    Instant       | Instant.ofEpochMilli(92554380000)                                 | UK     | "07/12/72 05:33"
-    Instant       | Instant.ofEpochMilli(92554380000)                                 | US     | "12/7/72 5:33 AM"
-  }
+    def "setAsText parses #type.simpleName instances correctly using HTML5 format"() {
+        given:
+        grailsApplication.config.javatime.format.html5 = true
+        and:
+        def editor = new DateTimeEditor(type)
+        when:
+        editor.asText = text
+        then:
+        editor.value == expected
+        where:
+        type          | text                        | expected
+        LocalDate     | "1971-11-29"                | LocalDate.of(1971, 11, 29)
+        LocalDateTime | "1971-11-29T17:00:00"       | LocalDateTime.of(1971, 11, 29, 17, 0)
+        ZonedDateTime | "2009-03-06T17:00:00+00:00" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
+        ZonedDateTime | "2009-03-06T17:00:00Z"      | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
+        ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123, UTC)
+        LocalTime     | "23:59:00"                  | LocalTime.of(23, 59)
+        Instant       | "1972-12-07T05:33:00.000Z"  | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
+    }
 
-  def "getAsText formats #type.simpleName instances correctly according to a configured pattern"() {
-    given:
-    grailsApplication.config.javatime.format."$type.simpleName" = config
-
-    and:
-    def editor = new DateTimeEditor(type)
-
-    when: editor.value = value
-    then: editor.asText == expected
-
-    where:
-    type          | config                | value                                                     | expected
-    LocalDate     | "dd/MM/yyyy"          | LocalDate.of(1971, 11, 29)                                | "29/11/1971"
-    LocalDateTime | "dd/MM/yyyy h:mm a"   | LocalDateTime.of(1971, 11, 29, 17, 0)                     | "29/11/1971 5:00 PM"
-    ZonedDateTime | "dd/MM/yyyy h:mm a Z" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC) | "06/03/2009 5:00 PM +0000"
-    LocalTime     | "h:mm a"              | LocalTime.of(23, 59)                                      | "11:59 PM"
-    Instant       | "dd/MM/yyyy h:mm a Z" | Instant.ofEpochMilli(92554380000)                         | "07/12/1972 5:33 AM +0000"
-  }
-
-  def "getAsText formats #type.simpleName instances correctly for HTML5"() {
-    given:
-    grailsApplication.config.javatime.format.html5 = true
-
-    and:
-    def editor = new DateTimeEditor(type)
-
-    when: editor.value = value
-    then: editor.asText == expected
-
-    where:
-    type          | value                                                            | expected
-    LocalDate     | LocalDate.of(1971, 11, 29)                                       | "1971-11-29"
-    LocalDateTime | LocalDateTime.of(1971, 11, 29, 17, 0)                            | "1971-11-29T17:00:00.000"
-    ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "2009-03-06T17:00:00.000+01:00"
-    LocalTime     | LocalTime.of(23, 59)                                             | "23:59:00.000"
-    Instant       | Instant.ofEpochMilli(92554380000)                                | "1972-12-07T05:33:00.000Z"
-  }
-
-  def "Instant values are always formatted as UTC"() {
-    given:
-    grailsApplication.config.javatime.format.html5 = true
-
-    and:
-    def defaultTimeZone = TimeZone.default
-    TimeZone.default = TimeZone.getTimeZone("EST")
-
-    and:
-    def editor = new DateTimeEditor(Instant)
-
-    when: editor.value = Instant.ofEpochMilli(92554380000)
-    then: editor.asText == "1972-12-07T05:33:00.000Z"
-
-    cleanup:
-    TimeZone.default = defaultTimeZone
-  }
-
-  def "setAsText parses #type.simpleName instances from #locale locale format text"() {
-    given:
-    def editor = new DateTimeEditor(type)
-
-    and: LocaleContextHolder.locale = locale
-
-    when: editor.asText = text
-    then: editor.value == expected
-
-    where:
-    type          | text              | locale | expected
-    LocalDate     | "29/11/71"        | UK     | LocalDate.of(1971, 11, 29)
-    LocalDate     | "11/29/71"        | US     | LocalDate.of(1971, 11, 29)
-    LocalDateTime | "06/03/09 17:00"  | UK     | LocalDateTime.of(2009, 3, 6, 17, 0)
-    LocalDateTime | "3/6/09 5:00 PM"  | US     | LocalDateTime.of(2009, 3, 6, 17, 0)
-    ZonedDateTime | "06/03/09 17:00"  | UK     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
-    ZonedDateTime | "3/6/09 5:00 PM"  | US     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
-    LocalTime     | "23:59"           | UK     | LocalTime.of(23, 59)
-    LocalTime     | "11:59 PM"        | US     | LocalTime.of(23, 59)
-    Instant       | "07/12/72 05:33"  | UK     | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
-    Instant       | "12/7/72 5:33 AM" | US     | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
-  }
-
-  def "setAsText parses #type.simpleName instances correctly according to a configured pattern"() {
-    given:
-    grailsApplication.config.javatime.format."$type.simpleName" = config
-
-    and:
-    def editor = new DateTimeEditor(type)
-
-    when: editor.asText = text
-    then: editor.value == expected
-
-    where:
-    type          | config                | text                        | expected
-    LocalDate     | "dd/MM/yyyy"          | "29/11/1971"                | LocalDate.of(1971, 11, 29)
-    LocalDateTime | "dd/MM/yyyy h:mm a"   | "29/11/1971 5:00 PM"        | LocalDateTime.of(1971, 11, 29, 17, 0)
-    ZonedDateTime | "dd/MM/yyyy h:mm a Z" | "06/03/2009 5:00 PM +0000"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
-    LocalTime     | "h:mm a"              | "11:59 PM"                  | LocalTime.of(23, 59)
-    Instant       | "dd/MM/yyyy h:mm a Z" | "07/12/1972 12:33 AM -0500" | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
-  }
-
-  def "setAsText parses #type.simpleName instances correctly using HTML5 format"() {
-    given:
-    grailsApplication.config.javatime.format.html5 = true
-
-    and:
-    def editor = new DateTimeEditor(type)
-
-    when: editor.asText = text
-    then: editor.value == expected
-
-    where:
-    type          | text                        | expected
-    LocalDate     | "1971-11-29"                | LocalDate.of(1971, 11, 29)
-    LocalDateTime | "1971-11-29T17:00:00"       | LocalDateTime.of(1971, 11, 29, 17, 0)
-    ZonedDateTime | "2009-03-06T17:00:00+00:00" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
-    ZonedDateTime | "2009-03-06T17:00:00Z"      | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
-    ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123, UTC)
-    LocalTime     | "23:59:00"                  | LocalTime.of(23, 59)
-    Instant       | "1972-12-07T05:33:00.000Z"  | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
-  }
-
-  def "configured format trumps HTML5"() {
-    given:
-    grailsApplication.config.javatime.format."$LocalDate.simpleName" = "dd/MM/yyyy"
-    grailsApplication.config.javatime.format.html5 = true
-
-    and:
-    def editor = new DateTimeEditor(LocalDate)
-
-    when: editor.value = LocalDate.of(1971, 11, 29)
-    then: editor.asText == "29/11/1971"
-  }
-
+    def "configured format trumps HTML5"() {
+        given:
+        grailsApplication.config.javatime.format."$LocalDate.simpleName" = "dd/MM/yyyy"
+        grailsApplication.config.javatime.format.html5 = true
+        and:
+        def editor = new DateTimeEditor(LocalDate)
+        when:
+        editor.value = LocalDate.of(1971, 11, 29)
+        then:
+        editor.asText == "29/11/1971"
+    }
 }

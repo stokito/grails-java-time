@@ -19,12 +19,11 @@ import java.beans.PropertyEditorSupport
 import java.time.ZoneId
 
 class ZoneIdEditor extends PropertyEditorSupport {
-	String getAsText() {
-		value?.id ?: ''
-	}
+    String getAsText() {
+        value?.id ?: ''
+    }
 
-	void setAsText(String text) {
-		value = text ? ZoneId.of(text) : null
-	}
-
+    void setAsText(String text) {
+        value = text ? ZoneId.of(text) : null
+    }
 }

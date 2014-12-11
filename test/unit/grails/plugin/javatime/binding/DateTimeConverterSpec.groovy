@@ -27,33 +27,33 @@ import java.time.ZonedDateTime
 @Unroll
 class DateTimeConverterSpec extends Specification {
 
-	static final ZoneOffset SYSTEM_DEFAULT_TIME_ZONE = ZoneOffset.ofHours(-12)
+    static final ZoneOffset SYSTEM_DEFAULT_TIME_ZONE = ZoneOffset.ofHours(-12)
 
-	def "convert(): #expected.class.simpleName object  #value"() {
-		given:
-		def dtc = new DateTimeConverter()
-		dtc.type = type
-		dtc.grailsApplication = new DefaultGrailsApplication()
-		dtc.grailsApplication.config.javatime.format.html5 = true
-		dtc.grailsApplication.config.javatime.format.java.time.ZonedDateTime = 'yyyy-MM-dd'
+    def "convert(): #expected.class.simpleName object  #value"() {
+        given:
+        def dtc = new DateTimeConverter()
+        dtc.type = type
+        dtc.grailsApplication = new DefaultGrailsApplication()
+        dtc.grailsApplication.config.javatime.format.html5 = true
+        dtc.grailsApplication.config.javatime.format.java.time.ZonedDateTime = 'yyyy-MM-dd'
 //   		dtc.grailsApplication.config.javatime.format.java.time.ZonedDateTime = 'yyyy-MM-dd HH:mm:ss'
-		dtc.grailsApplication.config.javatime.format.java.time.LocalDate = 'yyyy-MM-dd'
-		dtc.grailsApplication.config.javatime.format.java.time.LocalTime = 'HH:mm:ss'
-		dtc.defaultTimeZoneId = SYSTEM_DEFAULT_TIME_ZONE
-		expect:
-		dtc.canConvert(value)
-		dtc.convert(value) == expected
-		where:
-		value                           | type          | expected
-		'2014-04-23T04:30:45.123Z'      | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.UTC)
-		'2014-04-23T04:30:45.123+01:00' | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.ofHours(1))
-		'2014-04-23T04:30:45.123'       | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, SYSTEM_DEFAULT_TIME_ZONE)
-		'2014-04-23T04:30'              | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 0, 0, SYSTEM_DEFAULT_TIME_ZONE)
-		'2014-04-23'                    | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 0, 0, 0, 0, SYSTEM_DEFAULT_TIME_ZONE)
-		'2014-04-23T04:30:45.123'       | LocalDateTime | LocalDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000)
-		'2014-04-23T04:30:45'           | LocalDateTime | LocalDateTime.of(2014, 4, 23, 4, 30, 45)
-		'04:30:45.123'                  | LocalTime     | LocalTime.of(4, 30, 45, 123_000_000)
-		'04:30:45'                      | LocalTime     | LocalTime.of(4, 30, 45)
-	}
+        dtc.grailsApplication.config.javatime.format.java.time.LocalDate = 'yyyy-MM-dd'
+        dtc.grailsApplication.config.javatime.format.java.time.LocalTime = 'HH:mm:ss'
+        dtc.defaultTimeZoneId = SYSTEM_DEFAULT_TIME_ZONE
+        expect:
+        dtc.canConvert(value)
+        dtc.convert(value) == expected
+        where:
+        value                           | type          | expected
+        '2014-04-23T04:30:45.123Z'      | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.UTC)
+        '2014-04-23T04:30:45.123+01:00' | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, ZoneOffset.ofHours(1))
+        '2014-04-23T04:30:45.123'       | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000, SYSTEM_DEFAULT_TIME_ZONE)
+        '2014-04-23T04:30'              | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 4, 30, 0, 0, SYSTEM_DEFAULT_TIME_ZONE)
+        '2014-04-23'                    | ZonedDateTime | ZonedDateTime.of(2014, 4, 23, 0, 0, 0, 0, SYSTEM_DEFAULT_TIME_ZONE)
+        '2014-04-23T04:30:45.123'       | LocalDateTime | LocalDateTime.of(2014, 4, 23, 4, 30, 45, 123_000_000)
+        '2014-04-23T04:30:45'           | LocalDateTime | LocalDateTime.of(2014, 4, 23, 4, 30, 45)
+        '04:30:45.123'                  | LocalTime     | LocalTime.of(4, 30, 45, 123_000_000)
+        '04:30:45'                      | LocalTime     | LocalTime.of(4, 30, 45)
+    }
 }
 

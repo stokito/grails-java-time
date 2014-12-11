@@ -19,21 +19,21 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 class DateTimeConverter implements ValueConverter {
-
     static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
-
     Class type
     GrailsApplication grailsApplication
     ZoneId defaultTimeZoneId = ZoneId.systemDefault()
+    @Lazy
+    private ConfigObject config = grailsApplication.config.javatime.format
 
-    @Lazy private ConfigObject config = grailsApplication.config.javatime.format
-
+    @Override
     public boolean canConvert(Object value) {
         value instanceof String
     }
 
+    @Override
     public Object convert(Object value) {
-        return value ? safeParse((String)value) : null
+        return value ? safeParse((String) value) : null
     }
 
     //HACK: http://stackoverflow.com/questions/23596530/unable-to-obtain-zoneddatetime-from-temporalaccessor-using-datetimeformatter-and/27285822#27285822
@@ -45,6 +45,7 @@ class DateTimeConverter implements ValueConverter {
         }
     }
 
+    @Override
     public Class<?> getTargetType() {
         type
     }
@@ -52,8 +53,7 @@ class DateTimeConverter implements ValueConverter {
     protected DateTimeFormatter getFormatter() {
         if (hasConfigPatternFor(type)) {
             return DateTimeFormatter.ofPattern(getConfigPatternFor(type))
-        } else
-        if (useISO()) {
+        } else if (useISO()) {
             return getISOFormatterFor(type)
         } else {
             def style

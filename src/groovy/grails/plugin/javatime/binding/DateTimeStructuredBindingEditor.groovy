@@ -9,10 +9,8 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 class DateTimeStructuredBindingEditor implements StructuredBindingEditor {
-
     static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime].asImmutable()
-
-    Class type
+    final Class type
 
     DateTimeStructuredBindingEditor(Class type) {
         this.type = type

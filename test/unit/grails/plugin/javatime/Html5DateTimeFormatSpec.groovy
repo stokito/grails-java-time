@@ -1,6 +1,5 @@
 package grails.plugin.javatime
 
-import org.hamcrest.Matcher
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -8,7 +7,6 @@ import spock.lang.Unroll
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-import static org.hamcrest.Matchers.*
 
 @Unroll
 class Html5DateTimeFormatSpec extends Specification {
