@@ -25,12 +25,16 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.time.format.ResolverStyle
 
 class DateTimeEditor extends PropertyEditorSupport {
 	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
 	protected final Class type
+	ZoneId defaultTimeZoneId = ZoneId.systemDefault()
 	@Lazy private ConfigObject config = Holders.config?.javatime?.format
 
 	DateTimeEditor(Class type) {
@@ -62,19 +66,19 @@ class DateTimeEditor extends PropertyEditorSupport {
 		} else if (useISO()) {
 			return getISOFormatterFor(type)
 		} else {
-			def style
+			Locale locale = LocaleContextHolder.locale
+			DateTimeFormatter formatter
 			switch (type) {
 				case LocalTime:
-					style = '-S'
+					formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
 					break
 				case LocalDate:
-					style = 'S-'
+					formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale)
 					break
 				default:
-					style = 'SS'
+					formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale)
 			}
-			Locale locale = LocaleContextHolder.locale
-			return DateTimeFormatter.ofPattern(style, locale)
+			return formatter
 		}
 	}
 

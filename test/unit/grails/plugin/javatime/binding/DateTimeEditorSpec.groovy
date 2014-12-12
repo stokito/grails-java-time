@@ -189,7 +189,7 @@ class DateTimeEditorSpec extends Specification {
         LocalDateTime | "1971-11-29T17:00:00"       | LocalDateTime.of(1971, 11, 29, 17, 0)
         ZonedDateTime | "2009-03-06T17:00:00+00:00" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
         ZonedDateTime | "2009-03-06T17:00:00Z"      | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
-        ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123, UTC)
+        ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123_000_000, UTC)
         LocalTime     | "23:59:00"                  | LocalTime.of(23, 59)
         Instant       | "1972-12-07T05:33:00.000Z"  | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
     }
