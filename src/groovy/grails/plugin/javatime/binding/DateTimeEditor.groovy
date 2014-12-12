@@ -15,6 +15,8 @@
  */
 package grails.plugin.javatime.binding
 
+import grails.plugin.javatime.SmartDateParser
+
 import java.beans.PropertyEditorSupport
 import grails.plugin.javatime.Html5DateTimeFormat
 import grails.util.Holders
@@ -42,7 +44,16 @@ class DateTimeEditor extends PropertyEditorSupport {
 
 	@Override
 	void setAsText(String text) {
-		value = text ? formatter.parse(text) : null
+		value = text ? safeParse((String) text) : null
+	}
+
+	//HACK: http://stackoverflow.com/questions/23596530/unable-to-obtain-zoneddatetime-from-temporalaccessor-using-datetimeformatter-and/27285822#27285822
+	def safeParse(String value) {
+		if (type == ZonedDateTime.class) {
+			SmartDateParser.parse(value, defaultTimeZoneId);
+		} else {
+			return type.parse(value)
+		}
 	}
 
 	protected DateTimeFormatter getFormatter() {
