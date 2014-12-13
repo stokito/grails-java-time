@@ -24,6 +24,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.Year
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -112,9 +113,9 @@ class DateTimeEditorSpec extends Specification {
         where:
         type          | value                                                            | expected
         LocalDate     | LocalDate.of(1971, 11, 29)                                       | "1971-11-29"
-        LocalDateTime | LocalDateTime.of(1971, 11, 29, 17, 0)                            | "1971-11-29T17:00"
-        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "2009-03-06T17:00+01:00"
-        LocalTime     | LocalTime.of(23, 59)                                             | "23:59"
+        LocalDateTime | LocalDateTime.of(1971, 11, 29, 17, 0)                            | "1971-11-29T17:00:00"
+        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "2009-03-06T17:00:00+01:00"
+        LocalTime     | LocalTime.of(23, 59)                                             | "23:59:00"
         Instant       | Instant.ofEpochMilli(92554380000L)                               | "1972-12-07T05:33:00Z"
     }
 
@@ -145,8 +146,8 @@ class DateTimeEditorSpec extends Specification {
         editor.value == expected
         where:
         type          | text              | locale | expected
-        LocalDate     | "29/11/71"        | UK     | LocalDate.of(2971, 11, 29)
-        LocalDate     | "11/29/71"        | US     | LocalDate.of(2971, 11, 29)
+        LocalDate     | "29/11/71"        | UK     | LocalDate.of(2071, 11, 29)
+        LocalDate     | "11/29/71"        | US     | LocalDate.of(2071, 11, 29)
         LocalDateTime | "06/03/09 17:00"  | UK     | LocalDateTime.of(2009, 3, 6, 17, 0)
         LocalDateTime | "3/6/09 5:00 PM"  | US     | LocalDateTime.of(2009, 3, 6, 17, 0)
         ZonedDateTime | "06/03/09 17:00"  | UK     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())

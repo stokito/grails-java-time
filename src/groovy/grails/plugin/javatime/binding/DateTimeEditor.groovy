@@ -47,12 +47,16 @@ class DateTimeEditor extends PropertyEditorSupport {
 
 	@Override
 	String getAsText() {
-		return value ? (useISO() ? value.toString() : formatter.format(value)) : ''
+		return value ? formatter.format(value) : ''
 	}
 
 	@Override
 	void setAsText(String text) {
-		value = text ? formatter.parse(text) : null
+		value = text ? parse(text) : null
+	}
+
+	private parse(String text) {
+		return type == Instant ? type.parse(text) : type.parse(text, formatter)
 	}
 
 	protected DateTimeFormatter getFormatter() {
@@ -98,10 +102,18 @@ class DateTimeEditor extends PropertyEditorSupport {
 	}
 
 	private DateTimeFormatter getISOFormatterFor(Class type) {
-//			DateTimeFormatter.ISO_DATE
-//			DateTimeFormatter.ISO_TIME
-//			DateTimeFormatter.ISO_LOCAL_DATE_TIME
-//			DateTimeFormatter.ISO_ZONED_DATE_TIME
+		switch (type) {
+			case LocalTime:
+				return DateTimeFormatter.ISO_LOCAL_TIME
+			case LocalDate:
+				return DateTimeFormatter.ISO_LOCAL_DATE
+			case LocalDateTime:
+				return DateTimeFormatter.ISO_LOCAL_DATE_TIME
+			case ZonedDateTime:
+				return DateTimeFormatter.ISO_ZONED_DATE_TIME
+			case Instant:
+				return DateTimeFormatter.ISO_INSTANT
+		}
 		return null
 	}
 }
