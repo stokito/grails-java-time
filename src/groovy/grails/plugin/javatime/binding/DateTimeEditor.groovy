@@ -56,7 +56,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 	}
 
 	private parse(String text) {
-		return type == Instant ? type.parse(text) : type.parse(text, formatter)
+		return type == Instant ? ZonedDateTime.parse(text, formatter).toInstant() : type.parse(text, formatter)
 	}
 
 	protected DateTimeFormatter getFormatter() {
@@ -79,8 +79,6 @@ class DateTimeEditor extends PropertyEditorSupport {
 					formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale)
 					break
 				case Instant:
-					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(UTC)
-					break
 				case ZonedDateTime:
 				default:
 					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
@@ -112,7 +110,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 			case ZonedDateTime:
 				return DateTimeFormatter.ISO_ZONED_DATE_TIME
 			case Instant:
-				return DateTimeFormatter.ISO_INSTANT
+				return DateTimeFormatter.ISO_INSTANT.withZone(defaultTimeZoneId)
 		}
 		return null
 	}
