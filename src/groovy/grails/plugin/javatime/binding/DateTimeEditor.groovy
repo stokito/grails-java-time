@@ -69,21 +69,7 @@ class DateTimeEditor extends PropertyEditorSupport {
         } else if (useISO()) {
             return isoFormatter
         } else {
-            Locale locale = LocaleContextHolder.locale
-            DateTimeFormatter formatter
-            switch (type) {
-                case LocalTime:
-                    formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale)
-                    break
-                case LocalDate:
-                    formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale)
-                    break
-                case Instant:
-                case ZonedDateTime:
-                default:
-                    formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
-            }
-            return formatter
+            return localeFormatter
         }
     }
 
@@ -113,5 +99,23 @@ class DateTimeEditor extends PropertyEditorSupport {
                 return ISO_INSTANT.withZone(defaultTimeZoneId)
         }
         return null
+    }
+
+    private DateTimeFormatter getLocaleFormatter() {
+        Locale locale = LocaleContextHolder.locale
+        DateTimeFormatter formatter
+        switch (type) {
+            case LocalTime:
+                formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale)
+                break
+            case LocalDate:
+                formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale)
+                break
+            case Instant:
+            case ZonedDateTime:
+            default:
+                formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
+        }
+        return formatter
     }
 }
