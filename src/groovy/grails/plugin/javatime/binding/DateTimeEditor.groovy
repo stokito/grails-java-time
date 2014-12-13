@@ -37,7 +37,6 @@ import static java.time.format.FormatStyle.SHORT
 class DateTimeEditor extends PropertyEditorSupport {
     static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
     protected final Class type
-    ZoneId defaultTimeZoneId = ZoneId.systemDefault()
     @Lazy
     private ConfigObject config = Holders.config?.javatime?.format
 
@@ -63,7 +62,7 @@ class DateTimeEditor extends PropertyEditorSupport {
         if (hasConfigPattern()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(configPattern)
             if (type == Instant) {
-                formatter = formatter.withZone(UTC) //FIXME
+                formatter = formatter.withZone(ZoneId.systemDefault())
             }
             return formatter
         } else if (useISO()) {
@@ -96,7 +95,7 @@ class DateTimeEditor extends PropertyEditorSupport {
             case ZonedDateTime:
                 return ISO_ZONED_DATE_TIME
             case Instant:
-                return ISO_INSTANT.withZone(defaultTimeZoneId)
+                return ISO_INSTANT.withZone(ZoneId.systemDefault())
         }
         return null
     }
@@ -114,7 +113,7 @@ class DateTimeEditor extends PropertyEditorSupport {
             case Instant:
             case ZonedDateTime:
             default:
-                formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
+                formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(ZoneId.systemDefault())
         }
         return formatter
     }
