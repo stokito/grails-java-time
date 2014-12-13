@@ -25,11 +25,15 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.OffsetTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.time.format.ResolverStyle
+
+import static java.time.ZoneOffset.UTC
+import static java.time.format.FormatStyle.SHORT
 
 class DateTimeEditor extends PropertyEditorSupport {
 	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
@@ -48,16 +52,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 
 	@Override
 	void setAsText(String text) {
-		value = text ? safeParse((String) text) : null
-	}
-
-	//HACK: http://stackoverflow.com/questions/23596530/unable-to-obtain-zoneddatetime-from-temporalaccessor-using-datetimeformatter-and/27285822#27285822
-	def safeParse(String value) {
-		if (type == ZonedDateTime.class) {
-			SmartDateParser.parse(value, defaultTimeZoneId);
-		} else {
-			return type.parse(value)
-		}
+		value = text ? formatter.parse(text) : null
 	}
 
 	protected DateTimeFormatter getFormatter() {
@@ -70,13 +65,16 @@ class DateTimeEditor extends PropertyEditorSupport {
 			DateTimeFormatter formatter
 			switch (type) {
 				case LocalTime:
-					formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+					formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
 					break
 				case LocalDate:
-					formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale)
+					formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
+					break
+				case Instant:
+					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(UTC)
 					break
 				default:
-					formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale)
+					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
 			}
 			return formatter
 		}

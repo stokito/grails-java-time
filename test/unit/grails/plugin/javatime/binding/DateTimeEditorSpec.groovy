@@ -34,6 +34,7 @@ import static java.util.Locale.*
 @TestMixin(GrailsUnitTestMixin)
 @Unroll
 class DateTimeEditorSpec extends Specification {
+    static final ZoneOffset SYSTEM_DEFAULT_TIME_ZONE = ZoneOffset.ofHours(-12)
 
     void cleanup() {
         // it is frankly shocking that Grails requires me to do this. The test environment is not properly idempotent as configuration changes will leak from one test to another
@@ -77,8 +78,8 @@ class DateTimeEditorSpec extends Specification {
         ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | US     | "3/6/09 5:00 PM"
         LocalTime     | LocalTime.of(23, 59)                                              | UK     | "23:59"
         LocalTime     | LocalTime.of(23, 59)                                              | US     | "11:59 PM"
-        Instant       | Instant.ofEpochMilli(92554380000)                                 | UK     | "07/12/72 05:33"
-        Instant       | Instant.ofEpochMilli(92554380000)                                 | US     | "12/7/72 5:33 AM"
+        Instant       | Instant.ofEpochMilli(92554380000L)                                | UK     | "07/12/72 05:33"
+        Instant       | Instant.ofEpochMilli(92554380000L)                                | US     | "12/7/72 5:33 AM"
     }
 
     def "getAsText formats #type.simpleName instances correctly according to a configured pattern"() {
@@ -96,7 +97,7 @@ class DateTimeEditorSpec extends Specification {
         LocalDateTime | "dd/MM/yyyy h:mm a"   | LocalDateTime.of(1971, 11, 29, 17, 0)          | "29/11/1971 5:00 PM"
         ZonedDateTime | "dd/MM/yyyy h:mm a Z" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC) | "06/03/2009 5:00 PM +0000"
         LocalTime     | "h:mm a"              | LocalTime.of(23, 59)                           | "11:59 PM"
-        Instant       | "dd/MM/yyyy h:mm a Z" | Instant.ofEpochMilli(92554380000)              | "07/12/1972 5:33 AM +0000"
+        Instant       | "dd/MM/yyyy h:mm a Z" | Instant.ofEpochMilli(92554380000L)             | "07/12/1972 5:33 AM +0000"
     }
 
     def "getAsText formats #type.simpleName instances correctly for HTML5"() {
@@ -111,10 +112,10 @@ class DateTimeEditorSpec extends Specification {
         where:
         type          | value                                                            | expected
         LocalDate     | LocalDate.of(1971, 11, 29)                                       | "1971-11-29"
-        LocalDateTime | LocalDateTime.of(1971, 11, 29, 17, 0)                            | "1971-11-29T17:00:00.000"
-        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "2009-03-06T17:00:00.000+01:00"
-        LocalTime     | LocalTime.of(23, 59)                                             | "23:59:00.000"
-        Instant       | Instant.ofEpochMilli(92554380000)                                | "1972-12-07T05:33:00.000Z"
+        LocalDateTime | LocalDateTime.of(1971, 11, 29, 17, 0)                            | "1971-11-29T17:00:00"
+        ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "2009-03-06T17:00:00+01:00"
+        LocalTime     | LocalTime.of(23, 59)                                             | "23:59:00"
+        Instant       | Instant.ofEpochMilli(92554380000L)                               | "1972-12-07T05:33:00Z"
     }
 
     def "Instant values are always formatted as UTC"() {
@@ -122,13 +123,13 @@ class DateTimeEditorSpec extends Specification {
         grailsApplication.config.javatime.format.html5 = true
         and:
         def defaultTimeZone = TimeZone.default
-        TimeZone.default = TimeZone.getTimeZone("EST")
+        TimeZone.default = TimeZone.getTimeZone(SYSTEM_DEFAULT_TIME_ZONE)
         and:
         def editor = new DateTimeEditor(Instant)
         when:
-        editor.value = Instant.ofEpochMilli(92554380000)
+        editor.value = Instant.ofEpochMilli(92554380000L)
         then:
-        editor.asText == "1972-12-07T05:33:00.000Z"
+        editor.asText == "1972-12-07T05:33:00Z"
         cleanup:
         TimeZone.default = defaultTimeZone
     }
