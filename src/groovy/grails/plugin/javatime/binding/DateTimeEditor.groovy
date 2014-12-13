@@ -47,7 +47,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 
 	@Override
 	String getAsText() {
-		return value ? formatter.format(value) : ''
+		return value ? (useISO() ? value.toString() : formatter.format(value)) : ''
 	}
 
 	@Override
@@ -57,7 +57,11 @@ class DateTimeEditor extends PropertyEditorSupport {
 
 	protected DateTimeFormatter getFormatter() {
 		if (hasConfigPatternFor(type)) {
-			return DateTimeFormatter.ofPattern(getConfigPatternFor(type))
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getConfigPatternFor(type))
+			if (type == Instant) {
+				formatter = formatter.withZone(UTC)
+			}
+			return formatter
 		} else if (useISO()) {
 			return getISOFormatterFor(type)
 		} else {
@@ -65,14 +69,15 @@ class DateTimeEditor extends PropertyEditorSupport {
 			DateTimeFormatter formatter
 			switch (type) {
 				case LocalTime:
-					formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
+					formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale)
 					break
 				case LocalDate:
-					formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
+					formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale)
 					break
 				case Instant:
 					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(UTC)
 					break
+				case ZonedDateTime:
 				default:
 					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
 			}
@@ -93,17 +98,10 @@ class DateTimeEditor extends PropertyEditorSupport {
 	}
 
 	private DateTimeFormatter getISOFormatterFor(Class type) {
-		switch (type) {
-			case LocalTime:
-				return Html5DateTimeFormat.time()
-			case LocalDate:
-				return Html5DateTimeFormat.date()
-			case LocalDateTime:
-				return Html5DateTimeFormat.datetimeLocal()
-			case ZonedDateTime:
-			case Instant:
-				return Html5DateTimeFormat.datetime()
-		}
+//			DateTimeFormatter.ISO_DATE
+//			DateTimeFormatter.ISO_TIME
+//			DateTimeFormatter.ISO_LOCAL_DATE_TIME
+//			DateTimeFormatter.ISO_ZONED_DATE_TIME
 		return null
 	}
 }
