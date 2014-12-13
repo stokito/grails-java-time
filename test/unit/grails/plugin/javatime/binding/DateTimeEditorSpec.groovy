@@ -37,6 +37,10 @@ import static java.util.Locale.*
 class DateTimeEditorSpec extends Specification {
     static final ZoneOffset SYSTEM_DEFAULT_TIME_ZONE = ZoneOffset.ofHours(-12)
 
+    void setup() {
+        TimeZone.default = TimeZone.getTimeZone(SYSTEM_DEFAULT_TIME_ZONE)
+    }
+
     void cleanup() {
         // it is frankly shocking that Grails requires me to do this. The test environment is not properly idempotent as configuration changes will leak from one test to another
         grailsApplication.config.remove("javatime")
@@ -79,8 +83,8 @@ class DateTimeEditorSpec extends Specification {
         ZonedDateTime | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | US     | "3/6/09 5:00 PM"
         LocalTime     | LocalTime.of(23, 59)                                              | UK     | "23:59"
         LocalTime     | LocalTime.of(23, 59)                                              | US     | "11:59 PM"
-        Instant       | Instant.ofEpochMilli(92554380000L)                                | UK     | "07/12/72 05:33"
-        Instant       | Instant.ofEpochMilli(92554380000L)                                | US     | "12/7/72 5:33 AM"
+        Instant       | Instant.ofEpochMilli(92554380000L)                                | UK     | "06/12/72 17:33"
+        Instant       | Instant.ofEpochMilli(92554380000L)                                | US     | "12/6/72 5:33 PM"
     }
 
     def "getAsText formats #type.simpleName instances correctly according to a configured pattern"() {
@@ -119,7 +123,7 @@ class DateTimeEditorSpec extends Specification {
         Instant       | Instant.ofEpochMilli(92554380000L)                               | "1972-12-07T05:33:00Z"
     }
 
-    def "Instant values are always formatted as UTC"() {
+    def "Instant values are always formatted for system default time zone"() {
         given:
         grailsApplication.config.javatime.format.html5 = true
         and:
@@ -154,8 +158,8 @@ class DateTimeEditorSpec extends Specification {
         ZonedDateTime | "3/6/09 5:00 PM"  | US     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
         LocalTime     | "23:59"           | UK     | LocalTime.of(23, 59)
         LocalTime     | "11:59 PM"        | US     | LocalTime.of(23, 59)
-        Instant       | "07/12/72 05:33"  | UK     | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
-        Instant       | "12/7/72 5:33 AM" | US     | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        Instant       | "07/12/72 05:33"  | UK     | ZonedDateTime.of(2072, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        Instant       | "12/7/72 5:33 AM" | US     | ZonedDateTime.of(2072, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
     }
 
     def "setAsText parses #type.simpleName instances correctly according to a configured pattern"() {
@@ -173,7 +177,7 @@ class DateTimeEditorSpec extends Specification {
         LocalDateTime | "dd/MM/yyyy h:mm a"   | "29/11/1971 5:00 PM"        | LocalDateTime.of(1971, 11, 29, 17, 0)
         ZonedDateTime | "dd/MM/yyyy h:mm a Z" | "06/03/2009 5:00 PM +0000"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
         LocalTime     | "h:mm a"              | "11:59 PM"                  | LocalTime.of(23, 59)
-        Instant       | "dd/MM/yyyy h:mm a Z" | "07/12/1972 12:33 AM -0500" | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
+        Instant       | "dd/MM/yyyy h:mm a Z" | "07/12/1972 12:33 AM -0500" | ZonedDateTime.of(1972, 12, 7, 0, 33, 0, 0, UTC).toInstant()
     }
 
     def "setAsText parses #type.simpleName instances correctly using HTML5 format"() {
@@ -193,7 +197,7 @@ class DateTimeEditorSpec extends Specification {
         ZonedDateTime | "2009-03-06T17:00:00Z"      | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
         ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123_000_000, UTC)
         LocalTime     | "23:59:00"                  | LocalTime.of(23, 59)
-        Instant       | "1972-12-07T05:33:00Z"  | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
+        Instant       | "1972-12-07T05:33:00Z"      | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
     }
 
     def "configured format trumps HTML5"() {
