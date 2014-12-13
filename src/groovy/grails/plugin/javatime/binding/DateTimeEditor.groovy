@@ -60,14 +60,14 @@ class DateTimeEditor extends PropertyEditorSupport {
     }
 
     protected DateTimeFormatter getFormatter() {
-        if (hasConfigPatternFor()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(configPatternFor)
+        if (hasConfigPattern()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(configPattern)
             if (type == Instant) {
-                formatter = formatter.withZone(UTC)
+                formatter = formatter.withZone(UTC) //FIXME
             }
             return formatter
         } else if (useISO()) {
-            return getISOFormatterFor()
+            return isoFormatter
         } else {
             Locale locale = LocaleContextHolder.locale
             DateTimeFormatter formatter
@@ -87,11 +87,11 @@ class DateTimeEditor extends PropertyEditorSupport {
         }
     }
 
-    private boolean hasConfigPatternFor() {
+    private boolean hasConfigPattern() {
         config?.flatten()?."$type.simpleName"
     }
 
-    private String getConfigPatternFor() {
+    private String getConfigPattern() {
         config?.flatten()?."$type.simpleName"
     }
 
@@ -99,7 +99,7 @@ class DateTimeEditor extends PropertyEditorSupport {
         config?.html5
     }
 
-    private DateTimeFormatter getISOFormatterFor() {
+    private DateTimeFormatter getIsoFormatter() {
         switch (type) {
             case LocalTime:
                 return ISO_LOCAL_TIME
