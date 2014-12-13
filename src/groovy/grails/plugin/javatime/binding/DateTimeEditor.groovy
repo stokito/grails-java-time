@@ -15,103 +15,103 @@
  */
 package grails.plugin.javatime.binding
 
-import grails.plugin.javatime.SmartDateParser
-
 import java.beans.PropertyEditorSupport
-import grails.plugin.javatime.Html5DateTimeFormat
 import grails.util.Holders
 import org.springframework.context.i18n.LocaleContextHolder
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.OffsetTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 import static java.time.ZoneOffset.UTC
+import static java.time.format.DateTimeFormatter.ISO_INSTANT
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME
+import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 import static java.time.format.FormatStyle.SHORT
 
 class DateTimeEditor extends PropertyEditorSupport {
-	static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
-	protected final Class type
-	ZoneId defaultTimeZoneId = ZoneId.systemDefault()
-	@Lazy private ConfigObject config = Holders.config?.javatime?.format
+    static final SUPPORTED_TYPES = [LocalTime, LocalDate, LocalDateTime, ZonedDateTime, Instant].asImmutable()
+    protected final Class type
+    ZoneId defaultTimeZoneId = ZoneId.systemDefault()
+    @Lazy
+    private ConfigObject config = Holders.config?.javatime?.format
 
-	DateTimeEditor(Class type) {
-		this.type = type
-	}
+    DateTimeEditor(Class type) {
+        this.type = type
+    }
 
-	@Override
-	String getAsText() {
-		return value ? formatter.format(value) : ''
-	}
+    @Override
+    String getAsText() {
+        return value ? formatter.format(value) : ''
+    }
 
-	@Override
-	void setAsText(String text) {
-		value = text ? parse(text) : null
-	}
+    @Override
+    void setAsText(String text) {
+        value = text ? parse(text) : null
+    }
 
-	private parse(String text) {
-		return type == Instant ? ZonedDateTime.parse(text, formatter).toInstant() : type.parse(text, formatter)
-	}
+    private parse(String text) {
+        return type == Instant ? ZonedDateTime.parse(text, formatter).toInstant() : type.parse(text, formatter)
+    }
 
-	protected DateTimeFormatter getFormatter() {
-		if (hasConfigPatternFor(type)) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getConfigPatternFor(type))
-			if (type == Instant) {
-				formatter = formatter.withZone(UTC)
-			}
-			return formatter
-		} else if (useISO()) {
-			return getISOFormatterFor(type)
-		} else {
-			Locale locale = LocaleContextHolder.locale
-			DateTimeFormatter formatter
-			switch (type) {
-				case LocalTime:
-					formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale)
-					break
-				case LocalDate:
-					formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale)
-					break
-				case Instant:
-				case ZonedDateTime:
-				default:
-					formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
-			}
-			return formatter
-		}
-	}
+    protected DateTimeFormatter getFormatter() {
+        if (hasConfigPatternFor()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(configPatternFor)
+            if (type == Instant) {
+                formatter = formatter.withZone(UTC)
+            }
+            return formatter
+        } else if (useISO()) {
+            return getISOFormatterFor()
+        } else {
+            Locale locale = LocaleContextHolder.locale
+            DateTimeFormatter formatter
+            switch (type) {
+                case LocalTime:
+                    formatter = DateTimeFormatter.ofLocalizedTime(SHORT).withLocale(locale)
+                    break
+                case LocalDate:
+                    formatter = DateTimeFormatter.ofLocalizedDate(SHORT).withLocale(locale)
+                    break
+                case Instant:
+                case ZonedDateTime:
+                default:
+                    formatter = DateTimeFormatter.ofLocalizedDateTime(SHORT).withLocale(locale).withZone(defaultTimeZoneId)
+            }
+            return formatter
+        }
+    }
 
-	private boolean hasConfigPatternFor(Class type) {
-		config?.flatten()?."$type.simpleName"
-	}
+    private boolean hasConfigPatternFor() {
+        config?.flatten()?."$type.simpleName"
+    }
 
-	private String getConfigPatternFor(Class type) {
-		config?.flatten()?."$type.simpleName"
-	}
+    private String getConfigPatternFor() {
+        config?.flatten()?."$type.simpleName"
+    }
 
-	private boolean useISO() {
-		config?.html5
-	}
+    private boolean useISO() {
+        config?.html5
+    }
 
-	private DateTimeFormatter getISOFormatterFor(Class type) {
-		switch (type) {
-			case LocalTime:
-				return DateTimeFormatter.ISO_LOCAL_TIME
-			case LocalDate:
-				return DateTimeFormatter.ISO_LOCAL_DATE
-			case LocalDateTime:
-				return DateTimeFormatter.ISO_LOCAL_DATE_TIME
-			case ZonedDateTime:
-				return DateTimeFormatter.ISO_ZONED_DATE_TIME
-			case Instant:
-				return DateTimeFormatter.ISO_INSTANT.withZone(defaultTimeZoneId)
-		}
-		return null
-	}
+    private DateTimeFormatter getISOFormatterFor() {
+        switch (type) {
+            case LocalTime:
+                return ISO_LOCAL_TIME
+            case LocalDate:
+                return ISO_LOCAL_DATE
+            case LocalDateTime:
+                return ISO_LOCAL_DATE_TIME
+            case ZonedDateTime:
+                return ISO_ZONED_DATE_TIME
+            case Instant:
+                return ISO_INSTANT.withZone(defaultTimeZoneId)
+        }
+        return null
+    }
 }
