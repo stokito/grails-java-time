@@ -19,6 +19,7 @@ import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
@@ -31,6 +32,8 @@ class DateTimeConverterUnitSpec extends Specification {
 
     def "convert(): #expected.class.simpleName object  #value"() {
         given:
+//        dtc.defaultTimeZoneId = SYSTEM_DEFAULT_TIME_ZONE
+
         def dtc = new DateTimeConverter()
         dtc.type = type
         dtc.grailsApplication = new DefaultGrailsApplication()
@@ -39,7 +42,6 @@ class DateTimeConverterUnitSpec extends Specification {
 //   		dtc.grailsApplication.config.javatime.format.java.time.ZonedDateTime = 'yyyy-MM-dd HH:mm:ss'
         dtc.grailsApplication.config.javatime.format.java.time.LocalDate = 'yyyy-MM-dd'
         dtc.grailsApplication.config.javatime.format.java.time.LocalTime = 'HH:mm:ss'
-        dtc.defaultTimeZoneId = SYSTEM_DEFAULT_TIME_ZONE
         expect:
         dtc.canConvert(value)
         dtc.convert(value) == expected
@@ -54,6 +56,7 @@ class DateTimeConverterUnitSpec extends Specification {
         '2014-04-23T04:30:45'           | LocalDateTime | LocalDateTime.of(2014, 4, 23, 4, 30, 45)
         '04:30:45.123'                  | LocalTime     | LocalTime.of(4, 30, 45, 123_000_000)
         '04:30:45'                      | LocalTime     | LocalTime.of(4, 30, 45)
+        '2014-04-23'                    | LocalDate     | LocalDate.of(2014, 4, 23)
     }
 }
 

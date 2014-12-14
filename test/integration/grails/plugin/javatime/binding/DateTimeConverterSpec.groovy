@@ -1,9 +1,12 @@
 package grails.plugin.javatime.binding
 
 import grails.persistence.Entity
+import grails.util.GrailsNameUtils
 import org.grails.databinding.SimpleMapDataBindingSource
 import org.springframework.context.i18n.LocaleContextHolder
+import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.time.Instant
 import java.time.LocalDate
@@ -13,9 +16,9 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
+@Unroll
 class DateTimeConverterSpec extends Specification {
-
-    def grailsWebDataBinder
+    @Shared
     static Locale currentLocale
     static TimeZone currentTimeZone
 
@@ -31,41 +34,24 @@ class DateTimeConverterSpec extends Specification {
         TimeZone.default = currentTimeZone
     }
 
-    void "test conversion"() {
-        given:
-        DateTimeConverterSpecEntity entity = new DateTimeConverterSpecEntity()
-        def params = [:]
-        params.localTime = '16:55'
-        params.localDate = '22/10/2013'
-        params.localDateTime = '22/10/2013 17:33'
-        params.zonedDateTime = '22/10/2013 17:33'
-        params.instant = '22/10/2013 17:33'
-        when:
-        grailsWebDataBinder.bind entity, params as SimpleMapDataBindingSource
-        then:
-        entity.localTime == LocalTime.of(16, 55)
-        entity.localDate == LocalDate.of(2013, 10, 22)
-        entity.localDateTime == LocalDateTime.of(2013, 10, 22, 17, 33)
-        entity.zonedDateTime == ZonedDateTime.of(2013, 10, 22, 17, 33, 0, 0, ZoneId.systemDefault())
-        entity.instant == ZonedDateTime.of(2013, 10, 22, 17, 33, 0, 0, ZoneId.systemDefault()).toInstant()
-    }
-
-    void "test conversion from constructor"() {
+    void "test conversion from constructor #expected.class.simpleName object from a #value"() {
         given:
         def params = [:]
-        params.localTime = '16:55'
-        params.localDate = '22/10/2013'
-        params.localDateTime = '22/10/2013 17:33'
-        params.zonedDateTime = '22/10/2013 17:33'
-        params.instant = '22/10/2013 17:33'
+        params[propertyName] = value
         when:
         DateTimeConverterSpecEntity entity = new DateTimeConverterSpecEntity(params)
         then:
-        entity.localTime == LocalTime.of(16, 55)
-        entity.localDate == LocalDate.of(2013, 10, 22)
-        entity.localDateTime == LocalDateTime.of(2013, 10, 22, 17, 33)
-        entity.zonedDateTime == ZonedDateTime.of(2013, 10, 22, 17, 33, 0, 0, ZoneId.systemDefault())
-        entity.instant == ZonedDateTime.of(2013, 10, 22, 17, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        entity."$propertyName" == expected
+        where:
+        value            | expected
+        '16:55'          | LocalTime.of(16, 55)
+        '22/10/13'       | LocalDate.of(2013, 10, 22)
+        '22/10/13'       | LocalDate.of(2013, 10, 22)
+        '22/10/13 17:33' | LocalDateTime.of(2013, 10, 22, 17, 33)
+        '22/10/13 17:33' | ZonedDateTime.of(2013, 10, 22, 17, 33, 0, 0, ZoneId.systemDefault())
+        '22/10/13 17:33' | ZonedDateTime.of(2013, 10, 22, 17, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+
+        propertyName = GrailsNameUtils.getPropertyNameRepresentation(expected.class.simpleName)
     }
 }
 
