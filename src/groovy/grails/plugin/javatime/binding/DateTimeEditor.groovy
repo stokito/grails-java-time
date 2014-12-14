@@ -31,6 +31,7 @@ import static java.time.format.DateTimeFormatter.ISO_INSTANT
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME
 import static java.time.format.FormatStyle.SHORT
 
@@ -46,7 +47,11 @@ class DateTimeEditor extends PropertyEditorSupport {
 
     @Override
     String getAsText() {
-        return value ? formatter.format(value) : ''
+        return value ? format() : ''
+    }
+
+    private String format() {
+        return type == Instant ? formatter.withZone(ZoneId.systemDefault()).format(value) : formatter.format(value)
     }
 
     @Override
@@ -62,7 +67,7 @@ class DateTimeEditor extends PropertyEditorSupport {
         if (hasConfigPattern()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(configPattern)
             if (type == Instant) {
-                formatter = formatter.withZone(ZoneId.systemDefault())
+//                formatter = formatter.withZone(ZoneId.systemDefault())
             }
             return formatter
         } else if (useISO()) {
@@ -93,9 +98,8 @@ class DateTimeEditor extends PropertyEditorSupport {
             case LocalDateTime:
                 return ISO_LOCAL_DATE_TIME
             case ZonedDateTime:
-                return ISO_ZONED_DATE_TIME
             case Instant:
-                return ISO_INSTANT.withZone(ZoneId.systemDefault())
+                return ISO_OFFSET_DATE_TIME
         }
         return null
     }
