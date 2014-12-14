@@ -27,7 +27,6 @@ grails.project.dependency.resolution = {
 		test('org.jodd:jodd-lagarto:3.4.1') { export = false }
 		compile 'org.jadira.usertype:usertype.spi:3.2.0.GA'
 		compile 'org.jadira.usertype:usertype.core:3.2.0.GA'
-		compile 'org.jadira.usertype:usertype.extended:3.2.0.GA'
 	}
 
 	plugins {
