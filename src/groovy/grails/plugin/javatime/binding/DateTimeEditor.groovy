@@ -62,7 +62,7 @@ class DateTimeEditor extends PropertyEditorSupport {
 
     protected DateTimeFormatter getFormatter() {
         if (configPattern) {
-            return DateTimeFormatter.ofPattern(configPattern)
+            return DateTimeFormatter.ofPattern(configPattern.toString())
         } else if (useISO()) {
             return isoFormatter
         } else {
@@ -70,7 +70,7 @@ class DateTimeEditor extends PropertyEditorSupport {
         }
     }
 
-    private String getConfigPattern() {
+    private getConfigPattern() {
         config?.flatten()?."$type.simpleName"
     }
 
