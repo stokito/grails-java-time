@@ -25,7 +25,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 @Unroll
-class DateTimeConverterSpec extends Specification {
+class DateTimeConverterUnitSpec extends Specification {
 
     static final ZoneOffset SYSTEM_DEFAULT_TIME_ZONE = ZoneOffset.ofHours(-12)
 
