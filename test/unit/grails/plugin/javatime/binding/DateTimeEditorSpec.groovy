@@ -160,10 +160,10 @@ class DateTimeEditorSpec extends Specification {
         type          | config                | text                        | expected
         LocalDate     | "dd/MM/yyyy"          | "29/11/1971"                | LocalDate.of(1971, 11, 29)
         LocalDateTime | "dd/MM/yyyy h:mm a"   | "29/11/1971 5:00 PM"        | LocalDateTime.of(1971, 11, 29, 17, 0)
-//TODO        ZonedDateTime | "dd/MM/yyyy h:mm a"   | "06/03/2009 5:00 PM"        | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
+        ZonedDateTime | "dd/MM/yyyy h:mm a"   | "06/03/2009 5:00 PM"        | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
         ZonedDateTime | "dd/MM/yyyy h:mm a Z" | "06/03/2009 5:00 PM +0100"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1))
         LocalTime     | "h:mm a"              | "11:59 PM"                  | LocalTime.of(23, 59)
-//TODO        Instant       | "dd/MM/yyyy h:mm a"   | "07/12/1972 11:33 AM"       | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        Instant       | "dd/MM/yyyy h:mm a"   | "07/12/1972 11:33 AM"       | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneId.systemDefault()).toInstant()
         Instant       | "dd/MM/yyyy h:mm a Z" | "07/12/1972 11:33 AM +0500" | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneOffset.ofHours(5)).toInstant()
     }
 
@@ -180,12 +180,12 @@ class DateTimeEditorSpec extends Specification {
         type          | text                        | expected
         LocalDate     | "1971-11-29"                | LocalDate.of(1971, 11, 29)
         LocalDateTime | "1971-11-29T17:00:00"       | LocalDateTime.of(1971, 11, 29, 17, 0)
-//TODO        ZonedDateTime | "2009-03-06T17:00:00"       | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
+        ZonedDateTime | "2009-03-06T17:00:00"       | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
         ZonedDateTime | "2009-03-06T17:00:00+01:00" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1))
         ZonedDateTime | "2009-03-06T17:00:00Z"      | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
         ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123_000_000, UTC)
         LocalTime     | "23:59:00"                  | LocalTime.of(23, 59)
-//TODO        Instant       | "1972-12-07T05:33:00"      | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        Instant       | "1972-12-07T05:33:00"       | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
         Instant       | "1972-12-07T05:33:00Z"      | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
         Instant       | "1972-12-07T05:33:00+01:00" | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneOffset.ofHours(1)).toInstant()
     }

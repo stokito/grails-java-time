@@ -15,6 +15,8 @@
  */
 package grails.plugin.javatime.binding
 
+import grails.plugin.javatime.SmartDateParser
+
 import java.beans.PropertyEditorSupport
 import grails.util.Holders
 import org.springframework.context.i18n.LocaleContextHolder
@@ -57,7 +59,15 @@ class DateTimeEditor extends PropertyEditorSupport {
     }
 
     private parse(String text) {
-        return type == Instant ? ZonedDateTime.parse(text, formatter).toInstant() : type.parse(text, formatter)
+        if (type == Instant) {
+            return SmartDateParser.parse(text, formatter, ZoneId.systemDefault()).toInstant()
+        } else {
+            if (type == ZonedDateTime) {
+                return SmartDateParser.parse(text, formatter, ZoneId.systemDefault())
+            } else {
+                return type.parse(text, formatter)
+            }
+        }
     }
 
     protected DateTimeFormatter getFormatter() {
@@ -88,7 +98,7 @@ class DateTimeEditor extends PropertyEditorSupport {
                 return ISO_LOCAL_DATE_TIME
             case ZonedDateTime:
             case Instant:
-                return ISO_OFFSET_DATE_TIME
+                return SmartDateParser.SAFE_ZONED_FORMATTER
         }
         return null
     }
