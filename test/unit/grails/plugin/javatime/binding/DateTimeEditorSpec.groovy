@@ -96,14 +96,14 @@ class DateTimeEditorSpec extends Specification {
         then:
         editor.asText == expected
         where:
-        type          | config                | value                                          | expected
-        LocalDate     | "dd/MM/yyyy"          | LocalDate.of(1971, 11, 29)                     | "29/11/1971"
-        LocalDateTime | "dd/MM/yyyy h:mm a"   | LocalDateTime.of(1971, 11, 29, 17, 0)          | "29/11/1971 5:00 PM"
+        type          | config                | value                                                             | expected
+        LocalDate     | "dd/MM/yyyy"          | LocalDate.of(1971, 11, 29)                                        | "29/11/1971"
+        LocalDateTime | "dd/MM/yyyy h:mm a"   | LocalDateTime.of(1971, 11, 29, 17, 0)                             | "29/11/1971 5:00 PM"
         ZonedDateTime | "dd/MM/yyyy h:mm a"   | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault()) | "06/03/2009 5:00 PM"
-        ZonedDateTime | "dd/MM/yyyy h:mm a Z" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1)) | "06/03/2009 5:00 PM +0100"
-        LocalTime     | "h:mm a"              | LocalTime.of(23, 59)                           | "11:59 PM"
-        Instant       | "dd/MM/yyyy h:mm a"   | Instant.ofEpochMilli(92554380000L)             | "06/12/1972 5:33 PM"
-        Instant       | "dd/MM/yyyy h:mm a Z" | Instant.ofEpochMilli(92554380000L)             | "06/12/1972 5:33 PM -1200"
+        ZonedDateTime | "dd/MM/yyyy h:mm a Z" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1))  | "06/03/2009 5:00 PM +0100"
+        LocalTime     | "h:mm a"              | LocalTime.of(23, 59)                                              | "11:59 PM"
+        Instant       | "dd/MM/yyyy h:mm a"   | Instant.ofEpochMilli(92554380000L)                                | "06/12/1972 5:33 PM"
+        Instant       | "dd/MM/yyyy h:mm a Z" | Instant.ofEpochMilli(92554380000L)                                | "06/12/1972 5:33 PM -1200"
     }
 
     def "getAsText formats #type.simpleName instances correctly for HTML5"() {
@@ -141,10 +141,12 @@ class DateTimeEditorSpec extends Specification {
         LocalDateTime | "3/6/09 5:00 PM"  | US     | LocalDateTime.of(2009, 3, 6, 17, 0)
         ZonedDateTime | "06/03/09 17:00"  | UK     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
         ZonedDateTime | "3/6/09 5:00 PM"  | US     | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
+//TODO        ZonedDateTime | "3/6/09"          | US     | ZonedDateTime.of(2009, 3, 6, 0, 0, 0, 0, ZoneId.systemDefault())
         LocalTime     | "23:59"           | UK     | LocalTime.of(23, 59)
         LocalTime     | "11:59 PM"        | US     | LocalTime.of(23, 59)
         Instant       | "07/12/72 05:33"  | UK     | ZonedDateTime.of(2072, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
         Instant       | "12/7/72 5:33 AM" | US     | ZonedDateTime.of(2072, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+//TODO        Instant       | "12/7/72"         | US     | ZonedDateTime.of(2072, 12, 7, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()
     }
 
     def "setAsText parses #type.simpleName instances correctly according to a configured pattern"() {
@@ -157,14 +159,16 @@ class DateTimeEditorSpec extends Specification {
         then:
         editor.value == expected
         where:
-        type          | config                | text                        | expected
-        LocalDate     | "dd/MM/yyyy"          | "29/11/1971"                | LocalDate.of(1971, 11, 29)
-        LocalDateTime | "dd/MM/yyyy h:mm a"   | "29/11/1971 5:00 PM"        | LocalDateTime.of(1971, 11, 29, 17, 0)
-        ZonedDateTime | "dd/MM/yyyy h:mm a"   | "06/03/2009 5:00 PM"        | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
-        ZonedDateTime | "dd/MM/yyyy h:mm a Z" | "06/03/2009 5:00 PM +0100"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1))
-        LocalTime     | "h:mm a"              | "11:59 PM"                  | LocalTime.of(23, 59)
-        Instant       | "dd/MM/yyyy h:mm a"   | "07/12/1972 11:33 AM"       | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneId.systemDefault()).toInstant()
-        Instant       | "dd/MM/yyyy h:mm a Z" | "07/12/1972 11:33 AM +0500" | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneOffset.ofHours(5)).toInstant()
+        type          | config                  | text                        | expected
+        LocalDate     | "dd/MM/yyyy"            | "29/11/1971"                | LocalDate.of(1971, 11, 29)
+        LocalDateTime | "dd/MM/yyyy h:mm a"     | "29/11/1971 5:00 PM"        | LocalDateTime.of(1971, 11, 29, 17, 0)
+        ZonedDateTime | "dd/MM/yyyy h:mm a"     | "06/03/2009 5:00 PM"        | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneId.systemDefault())
+        ZonedDateTime | "dd/MM/yyyy h:mm a Z"   | "06/03/2009 5:00 PM +0100"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1))
+        ZonedDateTime | "dd/MM/yyyy[ h:mm a Z]" | "06/03/2009"                | ZonedDateTime.of(2009, 3, 6, 0, 0, 0, 0, ZoneId.systemDefault())
+        LocalTime     | "h:mm a"                | "11:59 PM"                  | LocalTime.of(23, 59)
+        Instant       | "dd/MM/yyyy h:mm a"     | "07/12/1972 11:33 AM"       | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneId.systemDefault()).toInstant()
+        Instant       | "dd/MM/yyyy h:mm a Z"   | "07/12/1972 11:33 AM +0500" | ZonedDateTime.of(1972, 12, 7, 11, 33, 0, 0, ZoneOffset.ofHours(5)).toInstant()
+        Instant       | "dd/MM/yyyy[ h:mm a Z]" | "07/12/1972"                | ZonedDateTime.of(1972, 12, 7, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()
     }
 
     def "setAsText parses #type.simpleName instances correctly using HTML5 format"() {
@@ -184,10 +188,12 @@ class DateTimeEditorSpec extends Specification {
         ZonedDateTime | "2009-03-06T17:00:00+01:00" | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, ZoneOffset.ofHours(1))
         ZonedDateTime | "2009-03-06T17:00:00Z"      | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 0, UTC)
         ZonedDateTime | "2009-03-06T17:00:00.123Z"  | ZonedDateTime.of(2009, 3, 6, 17, 0, 0, 123_000_000, UTC)
+        ZonedDateTime | "2009-03-06"                | ZonedDateTime.of(2009, 3, 6, 0, 0, 0, 0, ZoneId.systemDefault())
         LocalTime     | "23:59:00"                  | LocalTime.of(23, 59)
         Instant       | "1972-12-07T05:33:00"       | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneId.systemDefault()).toInstant()
         Instant       | "1972-12-07T05:33:00Z"      | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, UTC).toInstant()
         Instant       | "1972-12-07T05:33:00+01:00" | ZonedDateTime.of(1972, 12, 7, 5, 33, 0, 0, ZoneOffset.ofHours(1)).toInstant()
+        Instant       | "1972-12-07"                | ZonedDateTime.of(1972, 12, 7, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()
     }
 
     def "configured format trumps HTML5"() {
